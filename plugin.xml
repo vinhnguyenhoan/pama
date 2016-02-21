@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         id="application"
+         point="org.eclipse.core.runtime.applications">
+      <application>
+         <run
+               class="com.lehanh.pama.ui.Application">
+         </run>
+      </application>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            name="Tiếp tân"
+            class="com.lehanh.pama.ui.clientcustomer.ClientCustomerPerspective"
+            id="com.lehanh.pama.clientCustomerPerspective">
+      </perspective>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            class="com.lehanh.pama.ui.clientcustomer.UserSearchView"
+            id="com.lehanh.pama.userSearchView"
+            name="Tìm khách hàng"
+            restorable="true">
+      </view>
+      <view
+            class="com.lehanh.pama.ui.clientcustomer.TodayUserQueueView"
+            id="com.lehanh.pama.todayUserQueueView"
+            name="Danh sách chờ"
+            restorable="true">
+      </view>
+   </extension>
+
+</plugin>

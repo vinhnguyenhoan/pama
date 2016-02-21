@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: LeHanh Patient Manager
+Bundle-SymbolicName: com.lehanh.pama;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: com.lehanh.pama.ui.Activator
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: lib/org.eclipse.nebula.widgets.calendarcombo_1.0.0.jar,
+ lib/org.eclipse.nebula.widgets.gallery_0.6.0.201602041833.jar,
+ lib/org.eclipse.nebula.widgets.tablecombo_1.0.0.201602041833.jar
