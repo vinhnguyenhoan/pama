@@ -19,7 +19,7 @@ public class ApplicationWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
     public void preWindowOpen() {
         IWorkbenchWindowConfigurer configurer = getWindowConfigurer();
         configurer.setShowCoolBar(true);
-        configurer.setShowStatusLine(false);
+        configurer.setShowStatusLine(true);
         configurer.setTitle("LeHanh Cosmetic Patient Manager");
     }
 

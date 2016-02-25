@@ -8,6 +8,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.part.ViewPart;
+import org.eclipse.wb.swt.SWTResourceManager;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.widgets.Text;
@@ -16,10 +17,12 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.wb.swt.SWTResourceManager;
 import org.eclipse.swt.widgets.Label;
 
 public class PatientCaseView extends ViewPart {
+	
+	public static final String ID = "com.lehanh.pama.patientCaseView";
+	
 	private Text text;
 	private Text text_1;
 	private Text text_2;

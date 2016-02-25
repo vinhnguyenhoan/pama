@@ -1,21 +1,24 @@
 package com.lehanh.pama.ui.patientcase;
 
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.part.ViewPart;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.custom.CLabel;
-import org.eclipse.wb.swt.SWTResourceManager;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.nebula.widgets.calendarcombo.CalendarCombo;
-import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.part.ViewPart;
+import org.eclipse.wb.swt.SWTResourceManager;
+
 
 public class PatientInfoView extends ViewPart {
+	
+	public static final String ID = "com.lehanh.pama.patientInfoView";
+	
 	private Text text;
 	private Text text_3;
 	private Text text_4;

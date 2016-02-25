@@ -83,7 +83,7 @@ public class SnippetTreeLayut {
 	public class MyModel {
 		public MyModel parent;
 
-		public ArrayList<MyModel> child = new ArrayList<>();
+		public ArrayList<MyModel> child = new ArrayList<MyModel>();
 
 		public int counter;
 
