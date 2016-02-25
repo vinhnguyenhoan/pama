@@ -1,4 +1,4 @@
-package com.lehanh.pama.ui;
+package com.lehanh.pama.ui.sample;
 
 /*******************************************************************************
  * Copyright (c) 2000, 2011 IBM Corporation and others.

@@ -21,7 +21,6 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.wb.swt.PamaResourceManager;
 import org.eclipse.wb.swt.SWTResourceManager;
 
-import com.lehanh.pama.ui.TableImageCursor;
 
 public class OtherSample {
 	public static void main(String[] args) {
