@@ -18,8 +18,9 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.wb.swt.PamaResourceManager;
 import org.eclipse.wb.swt.SWTResourceManager;
+
+import com.lehanh.pama.ui.util.resourceManager.PamaResourceManager;
 
 
 public class OtherSample {

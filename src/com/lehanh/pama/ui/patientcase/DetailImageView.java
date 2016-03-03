@@ -21,7 +21,6 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.part.ViewPart;
-import org.eclipse.wb.swt.PamaResourceManager;
 import org.eclipse.wb.swt.SWTResourceManager;
 
 import org.eclipse.swt.layout.GridLayout;
@@ -30,6 +29,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.custom.SashForm;
+
+import com.lehanh.pama.ui.util.resourceManager.PamaResourceManager;
 
 public class DetailImageView extends ViewPart {
 	

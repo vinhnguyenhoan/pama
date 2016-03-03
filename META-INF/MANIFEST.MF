@@ -10,4 +10,8 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: lib/org.eclipse.nebula.widgets.calendarcombo_1.0.0.jar,
  lib/org.eclipse.nebula.widgets.gallery_0.6.0.201602041833.jar,
- lib/org.eclipse.nebula.widgets.tablecombo_1.0.0.201602041833.jar
+ lib/org.eclipse.nebula.widgets.tablecombo_1.0.0.201602041833.jar,
+ lib/commons-dbcp2-2.0.jar,
+ lib/mysql-connector-java-5.1.9.jar,
+ lib/gson-2.2.4.jar,
+ lib/commons-lang3-3.4.jar
