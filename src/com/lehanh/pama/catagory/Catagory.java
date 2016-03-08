@@ -1,17 +1,14 @@
 package com.lehanh.pama.catagory;
 
-import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.lehanh.pama.IJsonDataObject;
 import com.lehanh.pama.util.PamaException;
 
-public class Catagory implements Serializable, IJsonDataObject {
+public class Catagory {
 
-	private static final long serialVersionUID = 513034063043717183L;
 	private Long id;
 	private String name;
 	private String desc;
@@ -21,7 +18,6 @@ public class Catagory implements Serializable, IJsonDataObject {
 	private String refIdsText; // Ex: 1|2|3
 	private List<Long> refIds;
 	
-	private IJsonDataObject otherData;
 	private String otherDataText;
 	
 	public Catagory(CatagoryType type) {
@@ -33,10 +29,20 @@ public class Catagory implements Serializable, IJsonDataObject {
 		this.type = type;
 	}
 	
+	public Catagory(Long id, CatagoryType catagoryType, String name, String desc) {
+		this(id, catagoryType);
+		this.setName(name);
+		this.setDesc(desc);
+	}
+
 	public Long getId() {
 		return id;
 	}
 
+	public void setId(Long resultId) {
+		this.id = resultId;
+	}
+	
 	public CatagoryType getType() {
 		return this.type;
 	}
@@ -95,26 +101,12 @@ public class Catagory implements Serializable, IJsonDataObject {
 		return new LinkedList<Long>(refIds);
 	}
 
-	public IJsonDataObject getOtherData() {
-		return otherData;
-	}
-
-	public void setOtherData(IJsonDataObject otherData) {
-		this.otherData = otherData;
-		this.synOtherDataObjAndText(false);
-	}
-
 	public String getOtherDataText() {
 		return otherDataText;
 	}
 
 	public void setOtherDataText(String otherDataText) {
 		this.otherDataText = otherDataText;
-		this.synOtherDataObjAndText(true);
 	}
 
-	protected void synOtherDataObjAndText(boolean synOtherDataObjFromText) {
-		// for subclass
-	}
-	
 }

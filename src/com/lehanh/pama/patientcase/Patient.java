@@ -4,10 +4,6 @@ import java.util.Date;
 
 public class Patient {
 
-	private PatientCase patientCase;
-	private Anamnesis anamnesis;
-	private MedicalHistory medicalHistory;
-	
 	private long id;
 	private String imagePath;
 	private String name;
@@ -20,16 +16,11 @@ public class Patient {
 	private String email;
 	private String career;
 	
+	private Date lastVisit;
+	private Date nextAppointment;
+	
 	public Patient() {
 		
-	}
-
-	public PatientCase getPatientCase() {
-		return patientCase;
-	}
-
-	public void setPatientCase(PatientCase patientCase) {
-		this.patientCase = patientCase;
 	}
 
 	public long getId() {
@@ -118,6 +109,22 @@ public class Patient {
 
 	public void setImagePath(String imagePath) {
 		this.imagePath = imagePath;
+	}
+
+	public Date getLastVisit() {
+		return lastVisit;
+	}
+
+	public void setLastVisit(Date lastVisit) {
+		this.lastVisit = lastVisit;
+	}
+
+	public Date getNextAppointment() {
+		return nextAppointment;
+	}
+
+	public void setNextAppointment(Date nextAppointment) {
+		this.nextAppointment = nextAppointment;
 	}
 	
 }

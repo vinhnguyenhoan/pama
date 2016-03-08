@@ -1,5 +1,5 @@
 package com.lehanh.pama.db.dao;
 
-public class PatientDao {
+public class PatientDao implements IDao {
 
 }
