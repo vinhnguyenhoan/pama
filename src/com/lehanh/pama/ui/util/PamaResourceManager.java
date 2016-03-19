@@ -1,4 +1,4 @@
-package com.lehanh.pama.ui.util.resourceManager;
+package com.lehanh.pama.ui.util;
 
 import org.eclipse.wb.swt.SWTResourceManager;
 

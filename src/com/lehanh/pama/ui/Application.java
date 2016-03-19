@@ -78,11 +78,15 @@ public class Application implements IApplication, PamaApplication {
 	}
 
 	@Override
-	public String getProperty(String name) {
+	public String getProperty(String name, String defaultValues) {
 		if (appProperties == null) {
 			initAppProperties();
 		}
-		return appProperties.getProperty(name);
+		String result = appProperties.getProperty(name);
+		if (defaultValues != null && result == null) {
+			result = defaultValues;
+		}
+		return result;
 	}
 
 	private void initAppProperties() {

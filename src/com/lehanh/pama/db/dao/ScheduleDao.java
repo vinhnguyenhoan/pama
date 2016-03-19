@@ -25,7 +25,7 @@ public class ScheduleDao implements IDao {
 		ResultSet rs = null;
 		try {
 			conn = DatabaseManager.getInstance().getConn();
-			ps = conn.prepareStatement("select * from " + TABLE + " orderBy " + DATE_COL + " DESC");
+			ps = conn.prepareStatement("select * from " + TABLE + " order by " + DATE_COL + " DESC");
 			rs = ps.executeQuery();
 			
 			List<AppointmentSchedule> result = new LinkedList<AppointmentSchedule>();

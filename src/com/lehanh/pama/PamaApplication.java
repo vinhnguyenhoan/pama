@@ -8,7 +8,7 @@ public interface PamaApplication {
 	
 	void setPassword(String pw);
 	
-	String getProperty(String name);
+	String getProperty(String name, String defaultValue);
 
 	void logInfo(String message);
 	

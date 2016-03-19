@@ -25,12 +25,11 @@ public class CatagoryManager implements ICatagoryManager {
 		InternalCatagory internalCat;
 		for (CatagoryType catType : CatagoryType.values()) {
 			Catagory createdCat = catType.createCatalog(null);
-			if (!(createdCat instanceof InternalCatagory)) {
-				continue;
+			if ((createdCat instanceof InternalCatagory)) {
+				internalCat = (InternalCatagory) createdCat;
+				List<Catagory> catDatas = internalCat.createCatagoryList();
+				loadCatList(catDatas);
 			}
-			internalCat = (InternalCatagory) createdCat;
-			List<Catagory> catDatas = internalCat.createCatagoryList();
-			loadCatList(catDatas);
 		}
 	}
 

@@ -1,11 +1,17 @@
 package com.lehanh.pama.patientcase;
 
+import java.security.InvalidParameterException;
+import java.util.Calendar;
 import java.util.Date;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.lehanh.pama.util.DateUtils;
 
 public class Patient {
 
-	private long id;
-	private String imagePath;
+	private Long id;
+	private String imageName;
 	private String name;
 	private String address;
 	private String birthDayText;
@@ -17,18 +23,32 @@ public class Patient {
 	private String career;
 	
 	private Date lastVisit;
+	private Date lastSurgery;
 	private Date nextAppointment;
 	
+	// Note from doctor about this patient
+	private int patientLevel; // from 1-4
+	private String note;
+	
+	private MedicalPersonalInfo medicalPersonalInfo;
+	
 	public Patient() {
-		
 	}
 
-	public long getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(Long id) {
 		this.id = id;
+	}
+	
+	public MedicalPersonalInfo getMedicalPersonalInfo() {
+		return medicalPersonalInfo;
+	}
+
+	public void setMedicalPersonalInfo(MedicalPersonalInfo medicalPersonalInfo) {
+		this.medicalPersonalInfo = medicalPersonalInfo;
 	}
 
 	public String getName() {
@@ -36,6 +56,7 @@ public class Patient {
 	}
 
 	public void setName(String name) {
+		validateCommon(name, "Phải nhập tên");
 		this.name = name;
 	}
 
@@ -52,6 +73,7 @@ public class Patient {
 	}
 
 	public void setBirthDayText(String birthDayText) {
+		validateCommon(birthDayText, "Phải nhập ngày sinh");
 		this.birthDayText = birthDayText;
 	}
 
@@ -60,6 +82,7 @@ public class Patient {
 	}
 
 	public void setBirthDay(Date birthDay) {
+		validateCommon(birthDay, "Phải nhập ngày sinh");
 		this.birthDay = birthDay;
 	}
 
@@ -76,6 +99,7 @@ public class Patient {
 	}
 
 	public void setCellPhone(String cellPhone) {
+		// TODO validateMobi(cellPhone);
 		this.cellPhone = cellPhone;
 	}
 
@@ -92,6 +116,7 @@ public class Patient {
 	}
 
 	public void setEmail(String email) {
+		// TODO validateEmail(email);
 		this.email = email;
 	}
 
@@ -103,12 +128,12 @@ public class Patient {
 		this.career = career;
 	}
 
-	public String getImagePath() {
-		return imagePath;
+	public String getImageName() {
+		return imageName;
 	}
 
-	public void setImagePath(String imagePath) {
-		this.imagePath = imagePath;
+	public void setImageName(String imagePath) {
+		this.imageName = imagePath;
 	}
 
 	public Date getLastVisit() {
@@ -126,5 +151,46 @@ public class Patient {
 	public void setNextAppointment(Date nextAppointment) {
 		this.nextAppointment = nextAppointment;
 	}
+
+	public Date getLastSurgery() {
+		return lastSurgery;
+	}
+
+	public void setLastSurgery(Date lastSurgery) {
+		this.lastSurgery = lastSurgery;
+	}
+
+	public int getPatientLevel() {
+		return patientLevel;
+	}
+
+	public void setPatientLevel(int patientLevel) {
+		this.patientLevel = patientLevel;
+	}
+
+	public String getNote() {
+		return note;
+	}
+
+	public void setNote(String note) {
+		this.note = note;
+	}
+
+	public int getAge() {
+		return DateUtils.calculateAge(this.getBirthDay());
+	}
+
+	public void setBirthDay(Calendar date) {
+		validateCommon(date, "Phải nhập ngày sinh");
+		setBirthDay(date.getTime());
+	}
 	
+	private static final void validateCommon(Object obj, String message) {
+		if (obj == null) {
+			throw new InvalidParameterException(message);
+		}
+		if (obj instanceof String && StringUtils.isBlank(((String) obj))) {
+			throw new InvalidParameterException(message);
+		}
+	}
 }

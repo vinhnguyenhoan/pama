@@ -30,7 +30,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.custom.SashForm;
 
-import com.lehanh.pama.ui.util.resourceManager.PamaResourceManager;
+import com.lehanh.pama.ui.util.PamaResourceManager;
 
 public class DetailImageView extends ViewPart {
 	

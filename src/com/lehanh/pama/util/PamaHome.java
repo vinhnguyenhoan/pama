@@ -3,6 +3,8 @@ package com.lehanh.pama.util;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import com.lehanh.pama.ICatagoryManager;
@@ -22,35 +24,42 @@ public class PamaHome {
 	public static final String DB_PASS_PRO_NAME = "lh_pama_pass";
 	public static final String DB_IP_PRO_NAME = "lh_pama_db_ip";
 	
-	public static String getDbName() {
-		return application.getProperty(DB_NAME_PRO_NAME);
+	public static String getDbName(String defaultDB) {
+		return application.getProperty(DB_NAME_PRO_NAME, defaultDB);
 	}
 
-	public static String getDbUserName() {
-		return application.getProperty(DB_USER_NAME_PRO_NAME);
+	public static String getDbUserName(String defaultUserName) {
+		return application.getProperty(DB_USER_NAME_PRO_NAME, defaultUserName);
 	}
 
-	public static String getDbPass() {
-		return application.getProperty(DB_PASS_PRO_NAME);
+	public static String getDbPass(String defaultPass) {
+		return application.getProperty(DB_PASS_PRO_NAME, defaultPass);
 	}
 
-	public static String getDbIp() {
-		return application.getProperty(DB_IP_PRO_NAME);
+	public static String getDbIp(String defaultIP) {
+		return application.getProperty(DB_IP_PRO_NAME, defaultIP);
 	}
 	
 	private static final Map<Class<?>, IService> serviceManager = new HashMap<Class<?>, IService>();
+	private static final List<IService> serviceManagerOrderedList = new LinkedList<IService>();
 	static {
-		serviceManager.put(ICatagoryManager.class, new CatagoryManager());
-		serviceManager.put(IPatientManager.class, new PatientManager());
+		putService(ICatagoryManager.class, new CatagoryManager());
+		putService(IPatientManager.class, new PatientManager());
 	}
-	public static IService getService(Class<?> service) {
+	
+	private static final void putService(Class<?> type, IService instance) {
+		serviceManager.put(type, instance);
+		serviceManagerOrderedList.add(instance);
+	}
+	
+	public static final IService getService(Class<?> service) {
 		return serviceManager.get(service);
 	}
 
-	public static void initialize() {
+	public static final void initialize() {
 		try {
 			DatabaseManager.initialize();
-			for (IService service : serviceManager.values()) {
+			for (IService service : serviceManagerOrderedList) {
 				service.initialize();
 			}
 		} catch (SQLException e) {

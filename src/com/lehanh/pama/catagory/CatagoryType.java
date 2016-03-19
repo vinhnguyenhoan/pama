@@ -43,6 +43,11 @@ public enum CatagoryType {
 		public Catagory createCatalog(Long id) {
 			return new AppointmentCatagory(id, this);
 		}
+	}, 
+	SPIRIT_LEVEL {
+		public Catagory createCatalog(Long id) {
+			return new SpiritLevel(id, this);
+		}
 	}
 	;
 	

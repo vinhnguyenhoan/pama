@@ -14,4 +14,17 @@ public interface IPatientManager extends IService {
 	List<Patient> searchPatientAppointmentToday(boolean forceReload);
 	
 	int clearOldAppointment();
+
+	Patient createNewPatient(String imagePath, String name, String address,
+			Date birthDay, boolean isFermale, String cellPhone, String phone,
+			String email, String career, int patientLevel, String note);
+
+	Patient updatePatient(Long id, String imagePath, String name,
+			String address, Date birthDay, boolean isFermale, String cellPhone,
+			String phone, String email, String career, int patientLevel,
+			String note, String medicalHistory, String anamnesis);
+
+	Patient updateImage(String image);
+
+	Patient getCurrentPatient();
 }

@@ -11,7 +11,6 @@ import com.lehanh.pama.ICatagoryManager;
 import com.lehanh.pama.IPatientManager;
 import com.lehanh.pama.catagory.AppointmentCatagory;
 import com.lehanh.pama.catagory.Catagory;
-import com.lehanh.pama.catagory.CatagoryManager;
 import com.lehanh.pama.catagory.CatagoryType;
 import com.lehanh.pama.db.dao.ScheduleDao;
 import com.lehanh.pama.util.PamaException;
@@ -25,7 +24,7 @@ public class PatientManager implements IPatientManager {
 	
 	@Override
 	public void initialize() throws SQLException {
-		catagoryManager = (ICatagoryManager) PamaHome.getService(CatagoryManager.class);
+		catagoryManager = (ICatagoryManager) PamaHome.getService(ICatagoryManager.class);
 		// Load all appointment
 		reloadAppointment();
 	}
@@ -50,6 +49,30 @@ public class PatientManager implements IPatientManager {
 		}
 	}
 
+	@Override
+	public Patient createNewPatient(String imagePath, String name, String address, Date birthDay, boolean isFermale,
+			String cellPhone, String phone, String email, String career, int patientLevel, String note) {
+		Patient result = new Patient();
+		result.setAddress(address);
+		return result;
+	}
+	
+	@Override
+	public Patient updatePatient(Long id, String imagePath, String name, String address, Date birthDay, boolean isFermale,
+			String cellPhone, String phone, String email, String career, int patientLevel, String note, 
+			String medicalHistory, String anamnesis) {
+		Patient result = new Patient();
+		result.setAddress(address);
+		return result;
+	}
+	
+	@Override
+	public Patient updateImage(String image) {
+		
+		return null;
+	}
+	
+	
 	@Override
 	public Patient getPatientDetailById(Long id) {
 		// TODO Auto-generated method stub
@@ -80,6 +103,12 @@ public class PatientManager implements IPatientManager {
 	public int clearOldAppointment() {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	@Override
+	public Patient getCurrentPatient() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

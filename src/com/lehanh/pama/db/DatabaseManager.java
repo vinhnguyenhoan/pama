@@ -12,6 +12,14 @@ public class DatabaseManager {
 	private static DatabaseManager instance;
 	private Connection connection;
 	
+	private final String defaultUserName = "root";
+	private final String defaultPass = "root";
+	private final String defaultDB = "pama";
+	private final String defaultIP = 
+									//"127.0.0.1";
+									"localhost";
+									//"192.168.86.110";
+	
 	private DatabaseManager() {
 	}
 	
@@ -39,24 +47,19 @@ public class DatabaseManager {
 			se.initCause(e);
 			throw se;
 		}
-		openConnection();
-	}
-	
-	private void openConnection() throws SQLException {
 		PamaHome.application.logInfo("Opening db connection..."); //$NON-NLS-1$
-		String dburl = null;
-		if (PamaHome.getDbPass() == null || PamaHome.getDbName() == null) {
-			dburl = "jdbc:mysql://localhost/" + PamaHome.getDbName() + "?user=root&password=root" + PamaHome.getDbPass();
-		} else {
-			dburl = "jdbc:mysql://" + PamaHome.getDbIp() + "/" + PamaHome.getDbName() + "?" +
-					"user=" + PamaHome.getDbUserName() + "&password=" + PamaHome.getDbPass();
-		}
-		connection = DriverManager.getConnection(dburl + ";create=false");
+		String dburl = "jdbc:mysql://" + PamaHome.getDbIp(defaultIP) + ":3307/" + PamaHome.getDbName(defaultDB)
+					//+ "?" + "user=" + PamaHome.getDbUserName(defaultUserName) + "&password=" + PamaHome.getDbPass(defaultPass)
+					;
+		connection = DriverManager.getConnection(dburl, PamaHome.getDbUserName(defaultUserName), PamaHome.getDbPass(defaultPass)
+				//+ ";create=false"
+				);
 		// TODO for later ? migrationCheck();
 		// TODO prepareStatements();
 	}
 
-	public Connection getConn() {
+	public Connection getConn() throws SQLException {
+		initConnectionIfNeeded();
 		return this.connection;
 	}
 }

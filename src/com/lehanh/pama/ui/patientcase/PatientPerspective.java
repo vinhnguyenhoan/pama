@@ -19,9 +19,11 @@ public class PatientPerspective implements IPerspectiveFactory {
 	    folder.addView(PatientInfoView.ID);
 	    folder.addView(PatientCaseView.ID);
 	    folder.addView(DetailImageView.ID);
+	    folder.addView(PrescriptionView.ID);
 	    
 	    layout.getViewLayout(PatientInfoView.ID).setCloseable(false);
 	    layout.getViewLayout(PatientCaseView.ID).setCloseable(false);
 	    layout.getViewLayout(DetailImageView.ID).setCloseable(false);
+	    layout.getViewLayout(PrescriptionView.ID).setCloseable(false);
 	}
 }

@@ -55,6 +55,12 @@
             name="Thông tin"
             restorable="false">
       </view>
+      <view
+            class="com.lehanh.pama.ui.patientcase.PrescriptionView"
+            id="com.lehanh.pama.prescriptionView"
+            name="Toa thuốc"
+            restorable="false">
+      </view>
     </extension>
 	<extension 
          point="org.eclipse.ui.menus">
@@ -68,4 +74,16 @@
          </toolbar>
       </menuContribution>
    </extension>
+ <extension
+       id="product"
+       point="org.eclipse.core.runtime.products">
+    <product
+          application="com.lehanh.pama.application"
+          name="Pama">
+       <property
+             name="appName"
+             value="Pama">
+       </property>
+    </product>
+ </extension>
 </plugin>

@@ -20,7 +20,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.wb.swt.SWTResourceManager;
 
-import com.lehanh.pama.ui.util.resourceManager.PamaResourceManager;
+import com.lehanh.pama.ui.util.PamaResourceManager;
 
 
 public class OtherSample {

@@ -32,35 +32,46 @@ public class AppointmentSchedule {
 	public void setId(Long id) {
 		this.id = id;
 	}
+	
 	public Long getPatientId() {
 		return patientId;
 	}
 	public void setPatientId(Long patientId) {
 		this.patientId = patientId;
 	}
+	
 	public Date getAppointmentDate() {
 		return appointmentDate;
 	}
 	public void setAppointmentDate(Date appointmentDate) {
 		this.appointmentDate = appointmentDate;
 	}
+	
 	public boolean isResolved() {
 		return resolved;
 	}
 	public void setResolved(boolean resolved) {
 		this.resolved = resolved;
 	}
+	
 	public Long getAppointmentType() {
 		return appointmentType;
 	}
 	public void setAppointmentType(Long appointmentType) {
 		this.appointmentType = appointmentType;
 	}
+	
 	public AppointmentCatagory getAppointmentCatagory() {
 		return appointmentCatagory;
 	}
 	public void setAppointmentCatagory(AppointmentCatagory appointmentCatagory) {
 		this.appointmentCatagory = appointmentCatagory;
 	}
-	
+
+	public String getNote() {
+		return note;
+	}
+	public void setNote(String note) {
+		this.note = note;
+	}
 }

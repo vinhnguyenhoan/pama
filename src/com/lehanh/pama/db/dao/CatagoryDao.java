@@ -1,5 +1,6 @@
 package com.lehanh.pama.db.dao;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -11,6 +12,8 @@ import java.util.List;
 import com.lehanh.pama.catagory.Catagory;
 import com.lehanh.pama.catagory.CatagoryType;
 import com.lehanh.pama.db.DatabaseManager;
+import com.lehanh.pama.ui.util.MainApplication;
+import com.lehanh.pama.util.PamaHome;
 
 public class CatagoryDao implements IDao {
 
@@ -123,4 +126,19 @@ public class CatagoryDao implements IDao {
 		}
 	}
 
+	public static void main(String[] args) {
+		CatagoryDao catDao = new CatagoryDao();
+		try {
+			PamaHome.application = new MainApplication();
+			DatabaseManager.initialize();
+			List<Catagory> result = catDao.loadAllCatagory();
+			System.out.println("result " + result.size());
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 }
