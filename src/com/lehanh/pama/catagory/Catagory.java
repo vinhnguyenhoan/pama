@@ -14,7 +14,7 @@ public class Catagory {
 	private String desc;
 	private final CatagoryType type;
 	
-	public static final String SEPARATE = "|";
+	public static final String SEPARATE = "\\|";
 	private String refIdsText; // Ex: 1|2|3
 	private List<Long> refIds;
 	
@@ -35,6 +35,13 @@ public class Catagory {
 		this.setDesc(desc);
 	}
 
+	public Catagory(CatagoryType catagoryType, String name, String desc, String refIds) {
+		this(catagoryType);
+		this.setName(name);
+		this.setDesc(desc);
+		this.setRefIdsText(refIds);
+	}
+	
 	public Long getId() {
 		return id;
 	}
@@ -100,7 +107,7 @@ public class Catagory {
 		}
 		return new LinkedList<Long>(refIds);
 	}
-
+	
 	public String getOtherDataText() {
 		return otherDataText;
 	}

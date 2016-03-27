@@ -18,10 +18,10 @@ import com.lehanh.pama.util.PamaHome;
 public class CatagoryDao implements IDao {
 
 	private static final String CAT_TABLE = "catagory";
-	private static final String ID_COL = "c_id";
+	private static final String ID_COL = "id";
 	private static final String NAME_COL = "name";
-	private static final String TYPE_COL = "c_type";
-	private static final String DESC_COL = "c_desc";
+	private static final String TYPE_COL = "cat_type";
+	private static final String DESC_COL = "cat_desc";
 	private static final String REFIDS_COL = "ref_ids";
 	private static final String OTHERDATA_COL = "other_data";
 	
@@ -68,8 +68,10 @@ public class CatagoryDao implements IDao {
 		PreparedStatement ps = null;
 		try {
 			conn = DatabaseManager.getInstance().getConn();
-			ps = conn.prepareStatement("insert into " + CAT_TABLE + 
-					" set name=?, c_type=?, c_desc=?, ref_ids=?, other_data=? ", Statement.RETURN_GENERATED_KEYS);
+			ps = conn.prepareStatement(
+					"insert into " + CAT_TABLE + 
+						" (name, cat_type, cat_desc, ref_ids, other_data) " + 
+						" values (?, ?, ?, ?, ? ) ", Statement.RETURN_GENERATED_KEYS);
 			int i = 1;
 			ps.setString(i++, item.getName());
 			ps.setString(i++, item.getType().toString());
@@ -104,7 +106,10 @@ public class CatagoryDao implements IDao {
 		PreparedStatement ps = null;
 		try {
 			conn = DatabaseManager.getInstance().getConn();
-			ps = conn.prepareStatement("update " + CAT_TABLE + " set name, c_type, c_desc, ref_ids, other_data values(?, ?, ?, ?, ?) where item_id=?");
+			ps = conn.prepareStatement(
+					"update " + CAT_TABLE + 
+					" set name=?, cat_type=?, cat_desc=?, ref_ids=?, other_data=? " +
+					" where item_id=? ");
 
 			int i = 1;
 			ps.setString(i++, item.getName());
@@ -126,11 +131,47 @@ public class CatagoryDao implements IDao {
 		}
 	}
 
+	private void internalDeleteAll() throws SQLException {
+		Connection conn = null;
+		PreparedStatement ps = null;
+		try {
+			conn = DatabaseManager.getInstance().getConn();
+			ps = conn.prepareStatement("delete FROM " + CAT_TABLE);
+			System.out.println("SQL: " + ps);
+			ps.executeUpdate();
+		} finally {
+			if (ps != null) {
+				ps.close();
+			}
+			if (conn != null) {
+				conn.close();
+			}
+		}		
+	}
+	
 	public static void main(String[] args) {
 		CatagoryDao catDao = new CatagoryDao();
 		try {
 			PamaHome.application = new MainApplication();
 			DatabaseManager.initialize();
+			catDao.internalDeleteAll();
+			
+			long sg1 = catDao.insert(new Catagory(CatagoryType.SURGERY, "Nang mui silat", "Nang mui silat", null));
+			long sg2 = catDao.insert(new Catagory(CatagoryType.SURGERY, "Nang mui cau truc", "Nang mui cau truc", null));
+			long sg3 = catDao.insert(new Catagory(CatagoryType.SURGERY, "Chỉnh mũi gồ", "Chỉnh mũi gồ", null));
+			
+			long d1 = catDao.insert(new Catagory(CatagoryType.DIAGNOSE, "Mũi thap tai nan", "Mũi thap tai nan", sg1 + "|" + sg2));
+			long d2 = catDao.insert(new Catagory(CatagoryType.DIAGNOSE, "Mũi thap bam sinh", "Mũi thap bam sinh", sg1 + "|" + sg2));
+			long d3 = catDao.insert(new Catagory(CatagoryType.DIAGNOSE, "Mũi gồ", "Mũi gồ", String.valueOf(sg3)));
+			
+			long p1 = catDao.insert(new Catagory(CatagoryType.PROGNOSTIC, "Mũi Thap le te", "Mũi Thap le te", d2 + ""));
+			long p2 = catDao.insert(new Catagory(CatagoryType.PROGNOSTIC, "Mũi gãy", "Mũi gãy", d1 + ""));
+			long p3 = catDao.insert(new Catagory(CatagoryType.PROGNOSTIC, "Mũi dập", "Mũi dập", d1 + ""));
+			long p4 = catDao.insert(new Catagory(CatagoryType.PROGNOSTIC, "Mũi gồ", "Mũi gồ", d3 + ""));
+			
+			long s1 = catDao.insert(new Catagory(CatagoryType.SERVICE, "Nâng mũi", "Nâng mũi", p1 + "|" + p2 + "|" + p3 + "|" + p4));
+			catDao.insert(new Catagory(CatagoryType.SERVICE, "Nâng ngực", "Nâng ngực", null));
+
 			List<Catagory> result = catDao.loadAllCatagory();
 			System.out.println("result " + result.size());
 		} catch (SQLException e) {

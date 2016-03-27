@@ -7,7 +7,12 @@ public enum CatagoryType {
 			return new ServiceCatagory(id, this);
 		}
 	},
-	DIAGNOSE(SERVICE){
+	PROGNOSTIC(SERVICE) {
+		public Catagory createCatalog(Long id) {
+			return new PrognosticCatagory(id, this);
+		}
+	},
+	DIAGNOSE(PROGNOSTIC){
 		public Catagory createCatalog(Long id) {
 			return new DiagnoseCatagory(id, this);
 		}
@@ -15,11 +20,6 @@ public enum CatagoryType {
 	SURGERY(DIAGNOSE) {
 		public Catagory createCatalog(Long id) {
 			return new SurgeryCatagory(id, this);
-		}
-	},
-	PROGNOSTIC(SERVICE) {
-		public Catagory createCatalog(Long id) {
-			return new PrognosticCatagory(id, this);
 		}
 	},
 	PRESCRIPTION{

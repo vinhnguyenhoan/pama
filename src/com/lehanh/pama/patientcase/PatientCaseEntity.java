@@ -1,6 +1,7 @@
 package com.lehanh.pama.patientcase;
 
 import java.io.Serializable;
+import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 
@@ -12,6 +13,7 @@ import com.lehanh.pama.catagory.DrCatagory;
 import com.lehanh.pama.catagory.PrognosticCatagory;
 import com.lehanh.pama.catagory.ServiceCatagory;
 import com.lehanh.pama.catagory.SurgeryCatagory;
+import com.lehanh.pama.util.DateUtils;
 
 public class PatientCaseEntity implements Serializable, IJsonDataObject {
 
@@ -43,24 +45,24 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 	private DrCatagory dr;
 	
 	@Expose
-	@SerializedName("sId")
-	private Long serviceId;	
-	private ServiceCatagory service;
+	@SerializedName("sIds")
+	private List<String> serviceIds;	
+	private List<ServiceCatagory> serviceList;
 	
 	@Expose
-	@SerializedName("progId")
-	private Long prognosticCatagoryId;
-	private PrognosticCatagory prognosticCatagory;
+	@SerializedName("progIds")
+	private List<String> prognosticCatagoryIds;
+	private List<PrognosticCatagory> prognosticCatagoryList;
 	
 	@Expose
-	@SerializedName("diagId")
-	private Long diagnoseCatagoryId;
-	private DiagnoseCatagory diagnoseCatagory;
+	@SerializedName("diagIds")
+	private List<String> diagnoseCatagoryIds;
+	private List<DiagnoseCatagory> diagnoseCatagoryList;
 	
 	@Expose
-	@SerializedName("sgId")
-	private Long surgeryCatagoryId;
-	private SurgeryCatagory surgeryCatagory;
+	@SerializedName("sgIds")
+	private List<String> surgeryCatagoryIds;
+	private List<SurgeryCatagory> surgeryCatagoryList;
 	
 	@Expose
 	@SerializedName("noteCl")
@@ -70,7 +72,8 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 	private String noteFromDr;
 	
 	@Expose
-	private String tips;
+	@SerializedName("sSurgery")
+	private String smallSurgery;
 	@Expose
 	@SerializedName("advice")
 	private String adviceFromDr;
@@ -91,7 +94,8 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 	@Expose
 	@SerializedName("date")
 	private String dateAsText;
-
+	private Date date;
+	
 	public int getId() {
 		return id;
 	}
@@ -132,68 +136,69 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		this.dr = dr;
 	}
 
-	public Long getServiceId() {
-		return serviceId;
+	public List<String> getServiceIds() {
+		return serviceIds;
 	}
 
-	public void setServiceId(Long serviceId) {
-		this.serviceId = serviceId;
+	public void setServiceIds(List<String> serviceIds) {
+		this.serviceIds = serviceIds;
 	}
 
-	public ServiceCatagory getService() {
-		return service;
+	public List<ServiceCatagory> getServiceList() {
+		return serviceList;
 	}
 
-	public void setService(ServiceCatagory service) {
-		this.service = service;
+	public void setServiceList(List<ServiceCatagory> serviceList) {
+		this.serviceList = serviceList;
 	}
 
-	public Long getPrognosticCatagoryId() {
-		return prognosticCatagoryId;
+	public List<String> getPrognosticCatagoryIds() {
+		return prognosticCatagoryIds;
 	}
 
-	public void setPrognosticCatagoryId(Long prognosticCatagoryId) {
-		this.prognosticCatagoryId = prognosticCatagoryId;
+	public void setPrognosticCatagoryIds(List<String> prognosticCatagoryIds) {
+		this.prognosticCatagoryIds = prognosticCatagoryIds;
 	}
 
-	public PrognosticCatagory getPrognosticCatagory() {
-		return prognosticCatagory;
+	public List<PrognosticCatagory> getPrognosticCatagoryList() {
+		return prognosticCatagoryList;
 	}
 
-	public void setPrognosticCatagory(PrognosticCatagory prognosticCatagory) {
-		this.prognosticCatagory = prognosticCatagory;
+	public void setPrognosticCatagoryList(
+			List<PrognosticCatagory> prognosticCatagoryList) {
+		this.prognosticCatagoryList = prognosticCatagoryList;
 	}
 
-	public Long getDiagnoseCatagoryId() {
-		return diagnoseCatagoryId;
+	public List<String> getDiagnoseCatagoryIds() {
+		return diagnoseCatagoryIds;
 	}
 
-	public void setDiagnoseCatagoryId(Long diagnoseCatagoryId) {
-		this.diagnoseCatagoryId = diagnoseCatagoryId;
+	public void setDiagnoseCatagoryIds(List<String> diagnoseCatagoryIds) {
+		this.diagnoseCatagoryIds = diagnoseCatagoryIds;
 	}
 
-	public DiagnoseCatagory getDiagnoseCatagory() {
-		return diagnoseCatagory;
+	public List<DiagnoseCatagory> getDiagnoseCatagoryList() {
+		return diagnoseCatagoryList;
 	}
 
-	public void setDiagnoseCatagory(DiagnoseCatagory diagnoseCatagory) {
-		this.diagnoseCatagory = diagnoseCatagory;
+	public void setDiagnoseCatagoryList(List<DiagnoseCatagory> diagnoseCatagoryList) {
+		this.diagnoseCatagoryList = diagnoseCatagoryList;
 	}
 
-	public Long getSurgeryCatagoryId() {
-		return surgeryCatagoryId;
+	public List<String> getSurgeryCatagoryIds() {
+		return surgeryCatagoryIds;
 	}
 
-	public void setSurgeryCatagoryId(Long surgeryCatagoryId) {
-		this.surgeryCatagoryId = surgeryCatagoryId;
+	public void setSurgeryCatagoryIds(List<String> surgeryCatagoryIds) {
+		this.surgeryCatagoryIds = surgeryCatagoryIds;
 	}
 
-	public SurgeryCatagory getSurgeryCatagory() {
-		return surgeryCatagory;
+	public List<SurgeryCatagory> getSurgeryCatagoryList() {
+		return surgeryCatagoryList;
 	}
 
-	public void setSurgeryCatagory(SurgeryCatagory surgeryCatagory) {
-		this.surgeryCatagory = surgeryCatagory;
+	public void setSurgeryCatagoryList(List<SurgeryCatagory> surgeryCatagoryList) {
+		this.surgeryCatagoryList = surgeryCatagoryList;
 	}
 
 	public String getNoteFromClient() {
@@ -212,12 +217,12 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		this.noteFromDr = noteFromDr;
 	}
 
-	public String getTips() {
-		return tips;
+	public String getSmallSurgery() {
+		return smallSurgery;
 	}
 
-	public void setTips(String tips) {
-		this.tips = tips;
+	public void setSmallSurgery(String smallSurgery) {
+		this.smallSurgery = smallSurgery;
 	}
 
 	public String getAdviceFromDr() {
@@ -294,10 +299,23 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 
 	public void setDateAsText(String date) {
 		this.dateAsText = date;
+		this.date = null;
 	}
 	
 	public String getDateAsText() {
 		return dateAsText;
+	}
+
+	public Date getDate() throws ParseException {
+		if (date == null) {
+			date = DateUtils.convertDateDataType(dateAsText);
+		}
+		return date;
+	}
+
+	public void setDate(Date date) {
+		this.date = date;
+		this.dateAsText = DateUtils.convertDateDataType(date);
 	}
 	
 }

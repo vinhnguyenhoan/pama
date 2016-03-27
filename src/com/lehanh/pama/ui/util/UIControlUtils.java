@@ -47,7 +47,13 @@ public class UIControlUtils {
 	}
 
 	public static void selectComboById(CCombo combo, Object key) {
-		int index = (Integer) combo.getData(ID_KEY + key);
+		Integer index = (Integer) combo.getData(ID_KEY + key);
+		if (index == null) {
+			index = (Integer) combo.getData(START_INDEX);
+		}
+		if (index == null) {
+			index = -1;
+		}
 		combo.select(index);
 	}
 
@@ -61,7 +67,7 @@ public class UIControlUtils {
 		});
 	}
 
-	public static final boolean isDirty(Text text) {
+	public static final boolean isChanged(Text text) {
 		Boolean isDirty = (Boolean) text.getData(DIRTY);
 		return isDirty != null && isDirty;
 	}
@@ -73,5 +79,51 @@ public class UIControlUtils {
 		}
 		combo.select(startIndex);
 	}
+
+	public static void setText(Text mobiText, String cellPhone) {
+		// TODO Auto-generated method stub
+		
+	}
+
+//	public static void initialCombo(TableComboViewer combo,
+//			Collection<Catagory> values, String firstText, int startIndex,
+//			CatagoryToUIText objectToUIText) {
+//		
+//		// set the content provider
+//		combo.setContentProvider(ArrayContentProvider.getInstance());
+//		
+//		// set the label provider
+//		combo.setLabelProvider(new SingleItemLabelProvider());
+//
+//		// load the data
+//		combo.setInput(modelList);
+//		
+//		// add listener
+//		combo.addSelectionChangedListener(new ItemSelected("Sample1"));
+
+		
+//		int comboItemIndex = 0;
+//		
+//		if (firstText != null) {
+//			combo.add(firstText);
+//			combo.setData(FIRST_TEXT, firstText);
+//			comboItemIndex = 1;
+//		}
+//		
+//		for (Object value : listData) {
+//			if (objectToUIText != null) {
+//				combo.add(objectToUIText.showUI(value));
+//				combo.setData(ID_KEY + objectToUIText.getIdForUI(value), comboItemIndex);
+//			} else {
+//				combo.add(value.toString());
+//				combo.setData(ID_KEY + comboItemIndex, comboItemIndex);
+//			}
+//			combo.setData(VALUE_KEY + comboItemIndex, value);
+//			comboItemIndex++;
+//		}
+//		
+//		combo.setData(START_INDEX, startIndex);
+//		combo.select(startIndex);
+//	}
 
 }

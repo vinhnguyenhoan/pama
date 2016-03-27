@@ -1,5 +1,7 @@
 package com.lehanh.pama.util;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -18,12 +20,6 @@ public class DateUtils {
 		return period.getYears();
 	}
 	
-	public static void main(String[] args) {
-		Calendar g = GregorianCalendar.getInstance();
-		g.set(1985, 9, 18);
-		System.out.println(calculateAge(g.getTime()));
-	}
-
 	public static Date getDate(int year, int month, int day) {
 		try {
 			Date result = new DateTime(year, month, day, 0, 0, 0, 0).toDate();
@@ -40,5 +36,36 @@ public class DateUtils {
 		} catch (Exception e) {
 			return new int[] {0, 0, 0};
 		}
+	}
+
+	private static final SimpleDateFormat spDF = new SimpleDateFormat("dd/MM/yyyy");
+	
+	public static Date convertDateDataType(String dateAsText) throws ParseException {
+		if (dateAsText == null) {
+			return null;
+		}
+		return spDF.parse(dateAsText);
+	}
+
+	public static String convertDateDataType(Date date) {
+		if (date == null) {
+			return null;
+		}
+		return spDF.format(date);
+	}
+	
+	public static void main(String[] args) throws ParseException {
+		Calendar g = GregorianCalendar.getInstance();
+		g.set(1985, 9, 18);
+		System.out.println(calculateAge(g.getTime()));
+		
+		Object r = convertDateDataType((String) null);
+		System.out.println(r);
+		
+		r = convertDateDataType("11/11/2011");
+		System.out.println(r);
+		
+		r = convertDateDataType((Date) r);
+		System.out.println(r);
 	}
 }

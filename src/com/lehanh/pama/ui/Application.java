@@ -15,21 +15,27 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 
+import com.lehanh.pama.IPatientManager;
 import com.lehanh.pama.PamaApplication;
+import com.lehanh.pama.patientcase.IPatientViewPartListener;
+import com.lehanh.pama.patientcase.Patient;
 import com.lehanh.pama.util.PamaHome;
 
 /**
  * This class controls all aspects of the application's execution
  */
-public class Application implements IApplication, PamaApplication {
+public class Application implements IApplication, PamaApplication, IPatientViewPartListener {
 
 	private Properties appProperties;
+	public static TextStatusContribution patientTextContribution;
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.equinox.app.IApplication#start(org.eclipse.equinox.app.IApplicationContext)
 	 */
 	public Object start(IApplicationContext context) throws Exception {
 		PamaHome.application = this;
+		PamaHome.initialize();
+		((IPatientManager) PamaHome.getService(IPatientManager.class)).addPaListener(this);
 		Display display = PlatformUI.createDisplay();
 		try {
 			int returnCode = PlatformUI.createAndRunWorkbench(display, new ApplicationWorkbenchAdvisor());
@@ -144,5 +150,10 @@ public class Application implements IApplication, PamaApplication {
 		if (t != null) {
 			t.printStackTrace();
 		}
+	}
+
+	@Override
+	public void patientChanged(Patient oldPa, Patient newPa) {
+		patientTextContribution.setText(newPa.getName());
 	}
 }

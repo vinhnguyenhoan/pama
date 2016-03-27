@@ -13,6 +13,8 @@ import org.eclipse.nebula.widgets.tablecombo.TableCombo;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.CLabel;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -30,6 +32,9 @@ public class FormManager implements IFormManager {
 	private final Map<String, List<Control>> formControls = new HashMap<String, List<Control>>();
 	
 	private Class<?>[] ignoreControlType = {Table.class};
+	
+	private Map<String, Button[]> radioGroups = new HashMap<String, Button[]>();
+	private List<Button> defaultRadios = new LinkedList<Button>();
 	
 	private List<Control> ignoreControls = new LinkedList<Control>();
 	private List<Button> addNewButtons = new LinkedList<Button>();
@@ -83,7 +88,7 @@ public class FormManager implements IFormManager {
 			} else {
 				if (SWT.READ_ONLY == (child.getStyle() & SWT.READ_ONLY)) {
 					child.setData(READ_ONLY, true);
-					setEdittable(false, child);
+					setEditable(false, child);
 				}
 				collectedControls.add(child);
 			}
@@ -103,6 +108,9 @@ public class FormManager implements IFormManager {
 	@Override
 	public IFormManager enableAll(boolean enabled) {
 		for (Control control : formControls.get(ALL_CONTROL)) {
+			if (ignoreFromList(control, this.ignoreControls)) {
+				continue;
+			}
 			control.setEnabled(enabled);
 		}
 		return this;
@@ -111,39 +119,44 @@ public class FormManager implements IFormManager {
 	@Override
 	public IFormManager setEditableAll(boolean editable) {
 		for (Control control : formControls.get(ALL_CONTROL)) {
-			setEdittable(editable, control);
+			if (ignoreFromList(control, this.ignoreControls)) {
+				continue;
+			}
+			setEditable(editable, control);
 		}
 		return this;
 	}
 
-	private void setEdittable(boolean editable, Control control) {
+	@Override
+	public IFormManager setEditable(boolean editable, Control control) {
 		Boolean isReadOnly = (Boolean) control.getData(READ_ONLY);
-		if (control instanceof Text) {
-			if (Boolean.TRUE.equals(isReadOnly)) {
-				return; // Ignore if read only style control
-			}
+		if (control instanceof Text && !Boolean.TRUE.equals(isReadOnly)) {
+			// Ignore if read only style control
 			((Text) control).setEditable(editable);
 		} else if (control instanceof CCombo) {
 			CCombo ccombo = (CCombo) control;
 			ccombo.setListVisible(editable);
 			ccombo.setEnabled(editable);
 		} else if (control instanceof Combo) {
-			((Combo) control).setEnabled(editable);
 			Combo combo = (Combo) control;
 			combo.setListVisible(editable);
 			combo.setEnabled(editable);
 		} else if (control instanceof TableCombo) {
 			TableCombo tC = (TableCombo) control;
-			tC.setEditable(editable);
-			tC.setTableVisible(editable);
+			tC.setEnabled(editable);
+			//tC.setTableVisible(editable);
 		} else {
 			control.setEnabled(editable);
 		}
+		return this;
 	}
 
 	@Override
 	public IFormManager clearFormData() {
 		for (Control control : formControls.get(ALL_CONTROL)) {
+			if (ignoreFromList(control, this.ignoreControls)) {
+				continue;
+			}
 			if (control instanceof Text) {
 				((Text) control).setText(StringUtils.EMPTY);
 			} else if (control instanceof CCombo) {
@@ -151,15 +164,20 @@ public class FormManager implements IFormManager {
 			} else if (control instanceof Combo) {
 				// TODO revert index 0 or -1
 			} else if (control instanceof TableCombo) {
-				// TODO revert index 0 or -1
+				((TableCombo) control).getTextControl().setText(StringUtils.EMPTY);
 			} else if (control instanceof CDateTime) {
 				((CDateTime) control).setSelection((Date) null);
 			} else if (control instanceof Button) {
 				((Button) control).setSelection(false);
+				for (Button dB : this.defaultRadios) {
+					if (control == dB) {
+						((Button) control).setSelection(true);
+					}
+				}
 			}
 		}
 		
-		return null;
+		return this;
 	}
 
 	@Override
@@ -237,4 +255,66 @@ public class FormManager implements IFormManager {
 		}
 		return this;
 	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public IFormManager setEnableAllButtons(boolean isEnable) {
+		return this.enableButtons(false, cancelButtons, saveButtons, updateButtons, addNewButtons);
+	}
+
+	@Override
+	public IFormManager addRadioGroup(String groupId, final Button... radioButtons) {
+		if (radioButtons == null) {
+			return this;
+		}
+		this.radioGroups.put(groupId, radioButtons);
+		for (final Button button : radioButtons) {
+			button.addSelectionListener(new SelectionListener() {
+				
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					setDeselectAllButton(!button.getSelection(), radioButtons, button);
+				}
+				
+				@Override
+				public void widgetDefaultSelected(SelectionEvent e) {
+					setDeselectAllButton(!button.getSelection(), radioButtons, button);
+				}
+			});
+		}
+		return this;
+	}
+
+	private void setDeselectAllButton(boolean select, Button[] radioButtons, Button... ignoreButtons) {
+		rootLoop: 
+		for (final Button button : radioButtons) {
+			for (final Button igButton : ignoreButtons) {
+				if (button == igButton) {
+					continue rootLoop;
+				}
+			}
+			button.setSelection(select);
+		}
+	}
+
+	@Override
+	public IFormManager defaultRadios(Button... radioButtons) {
+		if (radioButtons == null || radioButtons.length == 0) {
+			this.defaultRadios = new LinkedList<Button>();
+		} else {
+			this.defaultRadios = Arrays.asList(radioButtons);
+		}
+		return this;
+	}
+
+	@Override
+	public Button getSelected(String groupId) {
+		for(Button but : radioGroups.get(groupId)) {
+			if (but.getSelection()) {
+				return but;
+			}
+		}
+		return null;
+	}
+
 }

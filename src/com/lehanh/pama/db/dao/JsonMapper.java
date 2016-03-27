@@ -1,6 +1,5 @@
 package com.lehanh.pama.db.dao;
 
-import com.google.gson.FieldBindingStrategy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.lehanh.pama.IJsonDataObject;
@@ -24,4 +23,5 @@ public class JsonMapper {
 	public static final <T> T fromJson(String json, Class<T> classT) {
 		return gson.fromJson(json, classT);
 	}
+	
 }

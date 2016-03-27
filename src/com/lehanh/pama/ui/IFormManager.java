@@ -14,6 +14,8 @@ public interface IFormManager {
 
 	IFormManager setEditableAll(boolean editable);
 
+	IFormManager setEditable(boolean editable, Control control);
+	
 	IFormManager clearFormData();
 
 	IFormManager addCreateButtons(Button... addNewBtn);
@@ -31,5 +33,13 @@ public interface IFormManager {
 	IFormManager edit();
 
 	IFormManager addNew();
+
+	IFormManager setEnableAllButtons(boolean isEnable);
+
+	IFormManager addRadioGroup(String groupId, Button... radioButtons);
+
+	IFormManager defaultRadios(Button... radioButtons);
+
+	Button getSelected(String groupId);
 
 }

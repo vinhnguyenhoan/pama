@@ -23,16 +23,17 @@ import com.lehanh.pama.ICatagoryManager;
 import com.lehanh.pama.IPatientManager;
 import com.lehanh.pama.catagory.Catagory;
 import com.lehanh.pama.catagory.CatagoryType;
+import com.lehanh.pama.patientcase.IPatientViewPartListener;
 import com.lehanh.pama.patientcase.MedicalPersonalInfo;
 import com.lehanh.pama.patientcase.Patient;
 import com.lehanh.pama.ui.PamaFormUI;
-import com.lehanh.pama.ui.util.InvalidInputFormException;
-import com.lehanh.pama.ui.util.ObjectToUIText;
-import com.lehanh.pama.ui.util.UIControlUtils;
+import com.lehanh.pama.ui.util.CatagoryToUIText;
 import com.lehanh.pama.util.DateUtils;
 import com.lehanh.pama.util.PamaHome;
 
-public class PatientInfoView extends PamaFormUI {
+import static com.lehanh.pama.ui.util.UIControlUtils.*;
+
+public class PatientInfoView extends PamaFormUI implements IPatientViewPartListener {
 	
 	public static final String ID = "com.lehanh.pama.patientInfoView";
 	
@@ -50,7 +51,7 @@ public class PatientInfoView extends PamaFormUI {
 	
 	private CLabel ageLbl;
 	private static final String AGE = "tu\u1ED5i";
-	
+
 	//private CalendarCombo birthDayCalendar;
 	//private DateTime birthDayCalendar;
 	private CDateTime birthDayCalendar;
@@ -69,11 +70,15 @@ public class PatientInfoView extends PamaFormUI {
 
 	private Button cancelBtn;
 	
+	private Composite buttonsComposite;
+	
 	private ICatagoryManager catManager;
 	
 	private IPatientManager paManager;
 
-	private Composite buttonsComposite;
+	private Button femaleRadio;
+	private Button maleRadio;
+	private static final String SEX_GROUP = "SEX_GROUP";
 	
 	public PatientInfoView() {
 		catManager = (ICatagoryManager) PamaHome.getService(ICatagoryManager.class);
@@ -147,11 +152,11 @@ public class PatientInfoView extends PamaFormUI {
 		this.ageLbl = new CLabel(composite_4, SWT.NONE);
 		ageLbl.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
 		
-		Button femaleRadio = new Button(composite_4, SWT.RADIO);
+		this.femaleRadio = new Button(composite_4, SWT.RADIO);
 		femaleRadio.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
 		femaleRadio.setText("N\u1EEF");
 		
-		Button maleRadio = new Button(composite_4, SWT.RADIO);
+		this.maleRadio = new Button(composite_4, SWT.RADIO);
 		maleRadio.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
 		maleRadio.setText("Nam");
 		
@@ -287,26 +292,18 @@ public class PatientInfoView extends PamaFormUI {
 	public void organizeUIComponent() {
 		getFormManager().addAllControlFromComposite(composite, true, buttonsComposite)
 						.addCreateButtons(addNewBtn).addEditButtons(editBtn).addSaveButtons(saveBtn).addCancelButtons(cancelBtn)
+						.addRadioGroup(SEX_GROUP, this.maleRadio, this.femaleRadio).defaultRadios(this.femaleRadio)
 						.setEditableAll(false)
 						.cancel(paManager.getCurrentPatient() != null);
 		
+		paManager.addPaListener(this);
+		
 		// init paLevelCombo
-		UIControlUtils.initialCombo(paLevelCombo, catManager.getCatagoryByType(CatagoryType.SPIRIT_LEVEL).values(), "Chưa xác định", 0,
-				new ObjectToUIText() {
-					
-					@Override
-					public String showUI(Object object) {
-						return ((Catagory) object).getDesc();
-					}
-
-					@Override
-					public Object getIdForUI(Object object) {
-						return ((Catagory) object).getId();
-					}
-				});
+		initialCombo(paLevelCombo, catManager.getCatagoryByType(CatagoryType.SPIRIT_LEVEL).values(), "Chưa xác định", 0,
+				new CatagoryToUIText());
 		
 		// listen modified detailExamText
-		UIControlUtils.listenModifiedByClient(detailExamText);
+		listenModifiedByClient(detailExamText);
 		
 		birthDayCalendar.addSelectionListener(new SelectionListener() {
 			
@@ -330,13 +327,13 @@ public class PatientInfoView extends PamaFormUI {
 		if (patient == null) {
 			return;
 		}
-		idText.setText(String.valueOf(patient.getId()));
-		mobiText.setText(patient.getCellPhone()) ;
-		phoneText.setText(patient.getPhone()) ;
-		nameText.setText(patient.getName()) ;
-		addText.setText(patient.getAddress());
-		emailText.setText(patient.getEmail());
-		careerText.setText(patient.getCareer());
+		setText(idText, String.valueOf(patient.getId()));
+		setText(mobiText, patient.getCellPhone());
+		setText(phoneText, patient.getPhone());
+		setText(nameText, patient.getName());
+		setText(addText, patient.getAddress());
+		setText(emailText, patient.getEmail());
+		setText(careerText, patient.getCareer());
 
 		//birthDayCalendar.setDate(patient.getBirthDay());
 		if (patient.getBirthDay() != null) {
@@ -347,60 +344,16 @@ public class PatientInfoView extends PamaFormUI {
 		
 		ageLbl.setText(patient.getAge() + " " + AGE);
 		
-		paNoteText.setText(patient.getNote());
-		UIControlUtils.selectComboById(paLevelCombo, patient.getPatientLevel());
+		setText(paNoteText, patient.getNote());
+		selectComboById(paLevelCombo, patient.getPatientLevel());
 		
 		MedicalPersonalInfo medicalPersonalInfo = patient.getMedicalPersonalInfo();
 		if (medicalPersonalInfo != null) {
-			anamnesisText.setText(medicalPersonalInfo.getAnamnesis());
-			medicalHistoryText.setText(medicalPersonalInfo.getMedicalHistory());
-			detailExamText.setText(medicalPersonalInfo.getPatientCaseSummary().getSummary(true));
+			setText(anamnesisText, medicalPersonalInfo.getAnamnesis());
+			setText(medicalHistoryText, medicalPersonalInfo.getMedicalHistory());
+			setText(detailExamText, medicalPersonalInfo.getPatientCaseSummary().getSummary(true));
 		}
 		
-		// TODO paImageLabel;
-	}
-	
-	private Patient createOrUpdateDataFromUI(Patient currPatient) throws InvalidInputFormException {
-		if (currPatient == null) {
-			currPatient = new Patient();
-		}
-		try {
-			updateFromUI(currPatient);
-		} catch (InvalidParameterException e) {
-			throw new InvalidInputFormException(e.getMessage());
-		}
-		return currPatient;
-	}
-
-	private void updateFromUI(Patient currPatient) {
-		currPatient.setCellPhone(mobiText.getText());
-		currPatient.setPhone(phoneText.getText());
-		currPatient.setName(nameText.getText());
-		currPatient.setAddress(addText.getText());
-		currPatient.setEmail(emailText.getText());
-		currPatient.setCareer(careerText.getText());
-
-		//currPatient.setBirthDay(birthDayCalendar.getDate());
-		//currPatient.setBirthDay(DateUtils.getDate(birthDayCalendar.getYear(), birthDayCalendar.getMonth(), birthDayCalendar.getDay()));
-		currPatient.setBirthDay(birthDayCalendar.getSelection());
-		
-		currPatient.setNote(paNoteText.getText());
-		Catagory selectedPaLevel = (Catagory) UIControlUtils.getValueFromCombo(paLevelCombo);
-		if (selectedPaLevel != null) {
-			currPatient.setPatientLevel(selectedPaLevel.getId().intValue());
-		} else {
-			currPatient.setPatientLevel(-1);
-		}
-		
-		MedicalPersonalInfo medicalPersonalInfo = currPatient.getMedicalPersonalInfo();
-		if (medicalPersonalInfo == null) {
-			medicalPersonalInfo = new MedicalPersonalInfo();
-		}
-		medicalPersonalInfo.setAnamnesis(anamnesisText.getText());
-		medicalPersonalInfo.setMedicalHistory(medicalHistoryText.getText());
-		if (UIControlUtils.isDirty(detailExamText)) {
-			medicalPersonalInfo.setPatientCaseSummary(detailExamText.getText());
-		}
 		// TODO paImageLabel;
 	}
 	
@@ -413,11 +366,30 @@ public class PatientInfoView extends PamaFormUI {
 
 	private void save() {
 		try {
-			Patient patient = createOrUpdateDataFromUI(paManager.getCurrentPatient());
-			// TODO save to DB
-			// TODO paManager.updatePatient(id, imagePath, name, address, birthDay, isFermale, cellPhone, phone, email, career, patientLevel, note, medicalHistory, anamnesis)
+			/*
+			id, imagePath, name, address, birthDay, isFermale,
+			cellPhone, phone, email, career, patientLevel, note, medicalHistory, anamnesis
+			 */
+			int paLevel = -1;
+			Catagory selectedPaLevel = (Catagory) getValueFromCombo(paLevelCombo);
+			if (selectedPaLevel != null) {
+				paLevel = selectedPaLevel.getId().intValue();
+			}
+			String detailExam = null;
+			if (isChanged(detailExamText)) {
+				detailExam = detailExamText.getText();
+			}
+			
+			paManager.updatePatient(
+					null, // TODO ImageName
+					// personal info
+					nameText.getText(), addText.getText(), birthDayCalendar.getSelection(),
+					femaleRadio == getFormManager().getSelected(SEX_GROUP),
+					mobiText.getText(), phoneText.getText(), emailText.getText(), careerText.getText(), paLevel, paNoteText.getText(),
+					// medical info
+					detailExam, medicalHistoryText.getText(), anamnesisText.getText());
 			getFormManager().saved(paManager.getCurrentPatient() != null);
-		} catch (InvalidInputFormException e) {
+		} catch (InvalidParameterException e) {
 			MessageBox dialog = 
 				  new MessageBox(composite.getShell(), SWT.ICON_ERROR | SWT.OK);
 			dialog.setText("Lổi nhập liệu");
@@ -438,8 +410,14 @@ public class PatientInfoView extends PamaFormUI {
 
 	@Override
 	public void setFocus() {
-		// TODO Auto-generated method stub
+		// TODO
 		handleData(paManager.getCurrentPatient());
+	}
+
+	@Override
+	public void patientChanged(Patient oldPa, Patient newPa) {
+		// TODO Auto-generated method stub
+		handleData(newPa);
 	}
 
 }

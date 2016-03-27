@@ -49,6 +49,7 @@ public class DatabaseManager {
 		}
 		PamaHome.application.logInfo("Opening db connection..."); //$NON-NLS-1$
 		String dburl = "jdbc:mysql://" + PamaHome.getDbIp(defaultIP) + ":3307/" + PamaHome.getDbName(defaultDB)
+					+ "?useUnicode=true&characterEncoding=UTF-8"
 					//+ "?" + "user=" + PamaHome.getDbUserName(defaultUserName) + "&password=" + PamaHome.getDbPass(defaultPass)
 					;
 		connection = DriverManager.getConnection(dburl, PamaHome.getDbUserName(defaultUserName), PamaHome.getDbPass(defaultPass)

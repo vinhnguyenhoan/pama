@@ -6,6 +6,7 @@ import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.lehanh.pama.db.dao.JsonMapper;
 import com.lehanh.pama.util.DateUtils;
 
 public class Patient {
@@ -192,5 +193,12 @@ public class Patient {
 		if (obj instanceof String && StringUtils.isBlank(((String) obj))) {
 			throw new InvalidParameterException(message);
 		}
+	}
+
+	public String getMedicalPersonalInfoText() {
+		if (medicalPersonalInfo == null) {
+			return null;
+		}
+		return JsonMapper.toJson(medicalPersonalInfo);
 	}
 }

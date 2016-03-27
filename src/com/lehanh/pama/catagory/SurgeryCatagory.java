@@ -18,7 +18,7 @@ public class SurgeryCatagory extends Catagory implements IContainJsonDataCatagor
 	}
 
 	SurgeryCatagory(Long id, CatagoryType catagoryType) {
-		super(CatagoryType.SURGERY);
+		super(id, CatagoryType.SURGERY);
 	}
 
 	@Override
