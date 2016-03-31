@@ -1,6 +1,7 @@
 package com.lehanh.pama.patientcase;
 
 import java.io.Serializable;
+import java.util.LinkedList;
 import java.util.List;
 
 import com.google.gson.annotations.Expose;
@@ -29,24 +30,29 @@ public class MedicalPersonalInfo implements Serializable, IJsonDataObject {
 	@SerializedName("mH")
 	private String medicalHistory;
 	
-	public void setPatientCases(List<PatientCaseEntity> patientCases) {
-		this.patientCases = patientCases;
-		this.patientCaseList = new PatientCaseList(patientCases);
-	}
-	
 	public IPatientCaseList getPatientCaseList() {
+		if (patientCaseList == null) {
+			patientCaseList = new PatientCaseList(getPatientCases());
+		}
 		return this.patientCaseList;
+	}
+
+	private List<PatientCaseEntity> getPatientCases() {
+		if (this.patientCases == null) {
+			this.patientCases = new LinkedList<PatientCaseEntity>();
+		}
+		return this.patientCases;
 	}
 
 	public PatientCaseSummary getPatientCaseSummary() {
 		if (patientCaseSummary == null) {
 			patientCaseSummary = new PatientCaseSummary();
 		}
-		patientCaseSummary.updatePatientCase(this.patientCases);
+		patientCaseSummary.updatePatientCase(this.getPatientCases());
 		return patientCaseSummary;
 	}
 
-	public void setPatientCaseSummary(PatientCaseSummary patientCaseSummary) {
+	private void setPatientCaseSummary(PatientCaseSummary patientCaseSummary) {
 		this.patientCaseSummary = patientCaseSummary;
 	}
 
@@ -68,10 +74,6 @@ public class MedicalPersonalInfo implements Serializable, IJsonDataObject {
 
 	public void setMedicalHistory(String medicalHistory) {
 		this.medicalHistory = medicalHistory;
-	}
-	
-	public boolean isEmptyVersions() {
-		return this.patientCases == null || this.patientCases.isEmpty();
 	}
 
 }

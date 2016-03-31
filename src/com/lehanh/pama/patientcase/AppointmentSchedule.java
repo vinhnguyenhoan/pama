@@ -1,29 +1,57 @@
 package com.lehanh.pama.patientcase;
 
+import java.io.Serializable;
 import java.util.Date;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+import com.lehanh.pama.IJsonDataObject;
 import com.lehanh.pama.catagory.AppointmentCatagory;
 
-public class AppointmentSchedule {
+public class AppointmentSchedule implements Serializable, IJsonDataObject {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1063676387287507607L;
+	
+	@Expose
+	@SerializedName("appoId")
 	private Long id;
+	
 	private Long patientId;
 	
+	@Expose
+	@SerializedName("appoDate")
 	private Date appointmentDate;
 	
+	@Expose
+	@SerializedName("appoIsRes")
 	private boolean resolved;
 	
+	@Expose
+	@SerializedName("appoType")
 	private Long appointmentType;
 	private AppointmentCatagory appointmentCatagory;
 	
+	@Expose
+	@SerializedName("appoNote")
 	private String note;
 	
 	public AppointmentSchedule(Long id, Long patientId, Date appointmentDate,
-			Long appointmentType) {
+			Long appointmentType, String note, boolean resolved) {
 		this.id = id;
 		this.patientId = patientId;
 		this.appointmentDate = appointmentDate;
 		this.appointmentType = appointmentType;
+		this.note = note;
+		this.resolved = resolved;
+	}
+	
+	public AppointmentSchedule(Date appointmentDate, AppointmentCatagory appointmentCatagory, String note) {
+		this.appointmentDate = appointmentDate;
+		this.appointmentCatagory = appointmentCatagory;
+		this.note = note;
 	}
 	
 	public Long getId() {
@@ -55,6 +83,9 @@ public class AppointmentSchedule {
 	}
 	
 	public Long getAppointmentType() {
+		if (appointmentType == null) {
+			return -1l;
+		}
 		return appointmentType;
 	}
 	public void setAppointmentType(Long appointmentType) {

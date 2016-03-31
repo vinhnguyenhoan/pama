@@ -8,6 +8,7 @@ import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.lehanh.pama.IJsonDataObject;
+import com.lehanh.pama.catagory.AppointmentCatagory;
 import com.lehanh.pama.catagory.DiagnoseCatagory;
 import com.lehanh.pama.catagory.DrCatagory;
 import com.lehanh.pama.catagory.PrognosticCatagory;
@@ -23,7 +24,7 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 	private static final long serialVersionUID = -7533407014313088176L;
 
 	@Expose
-	private int id;
+	private int id = -1;
 	
 	@Expose
 	@SerializedName("ss")
@@ -34,11 +35,6 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 	@SerializedName("sDate")
 	private String surgeryDateAsText;
 	private Date surgeryDate;
-	
-	@Expose
-	@SerializedName("nDate")
-	private String nextDateAsText;
-	private Date nextDate;
 	
 	@Expose
 	private Long drId;	
@@ -53,16 +49,26 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 	@SerializedName("progIds")
 	private List<String> prognosticCatagoryIds;
 	private List<PrognosticCatagory> prognosticCatagoryList;
+	@Expose
+	@SerializedName("progOth")
+	private String prognosticOther;
 	
 	@Expose
 	@SerializedName("diagIds")
 	private List<String> diagnoseCatagoryIds;
 	private List<DiagnoseCatagory> diagnoseCatagoryList;
+	@Expose
+	@SerializedName("diagOth")
+	private String diagnoseOther;
 	
 	@Expose
 	@SerializedName("sgIds")
 	private List<String> surgeryCatagoryIds;
 	private List<SurgeryCatagory> surgeryCatagoryList;
+	
+	@Expose
+	@SerializedName("sgNote")
+	private String surgeryNote;
 	
 	@Expose
 	@SerializedName("noteCl")
@@ -95,20 +101,38 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 	@SerializedName("date")
 	private String dateAsText;
 	private Date date;
+
+//	@Expose
+//	@SerializedName("nDate")
+//	private String nextDateAsText;
+//	private Date nextDate;
 	
+	@Expose
+	@SerializedName("appoS")
+	private AppointmentSchedule appoSchedule;
+
+	PatientCaseEntity(String dateText, PatientCaseStatus status) {
+		this.setDateAsText(dateText);
+		this.setStatusEnum(status);
+	}
+
 	public int getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	void setId(int id) {
 		this.id = id;
+	}
+	
+	public boolean isNew() {
+		return this.id == -1;
 	}
 
 	public String getStatus() {
 		return status;
 	}
 
-	public void setStatus(String status) {
+	void setStatus(String status) {
 		this.status = status;
 	}
 
@@ -116,15 +140,16 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		return statusEnum;
 	}
 
-	public void setStatusEnum(PatientCaseStatus statusEnum) {
+	void setStatusEnum(PatientCaseStatus statusEnum) {
 		this.statusEnum = statusEnum;
+		this.status = statusEnum.name();
 	}
 
 	public Long getDrId() {
 		return drId;
 	}
 
-	public void setDrId(Long drId) {
+	void setDrId(Long drId) {
 		this.drId = drId;
 	}
 
@@ -132,7 +157,7 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		return dr;
 	}
 
-	public void setDr(DrCatagory dr) {
+	void setDr(DrCatagory dr) {
 		this.dr = dr;
 	}
 
@@ -140,7 +165,7 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		return serviceIds;
 	}
 
-	public void setServiceIds(List<String> serviceIds) {
+	void setServiceIds(List<String> serviceIds) {
 		this.serviceIds = serviceIds;
 	}
 
@@ -148,7 +173,7 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		return serviceList;
 	}
 
-	public void setServiceList(List<ServiceCatagory> serviceList) {
+	void setServiceList(List<ServiceCatagory> serviceList) {
 		this.serviceList = serviceList;
 	}
 
@@ -156,7 +181,7 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		return prognosticCatagoryIds;
 	}
 
-	public void setPrognosticCatagoryIds(List<String> prognosticCatagoryIds) {
+	void setPrognosticCatagoryIds(List<String> prognosticCatagoryIds) {
 		this.prognosticCatagoryIds = prognosticCatagoryIds;
 	}
 
@@ -164,7 +189,7 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		return prognosticCatagoryList;
 	}
 
-	public void setPrognosticCatagoryList(
+	void setPrognosticCatagoryList(
 			List<PrognosticCatagory> prognosticCatagoryList) {
 		this.prognosticCatagoryList = prognosticCatagoryList;
 	}
@@ -173,7 +198,7 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		return diagnoseCatagoryIds;
 	}
 
-	public void setDiagnoseCatagoryIds(List<String> diagnoseCatagoryIds) {
+	void setDiagnoseCatagoryIds(List<String> diagnoseCatagoryIds) {
 		this.diagnoseCatagoryIds = diagnoseCatagoryIds;
 	}
 
@@ -181,7 +206,7 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		return diagnoseCatagoryList;
 	}
 
-	public void setDiagnoseCatagoryList(List<DiagnoseCatagory> diagnoseCatagoryList) {
+	void setDiagnoseCatagoryList(List<DiagnoseCatagory> diagnoseCatagoryList) {
 		this.diagnoseCatagoryList = diagnoseCatagoryList;
 	}
 
@@ -189,7 +214,7 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		return surgeryCatagoryIds;
 	}
 
-	public void setSurgeryCatagoryIds(List<String> surgeryCatagoryIds) {
+	void setSurgeryCatagoryIds(List<String> surgeryCatagoryIds) {
 		this.surgeryCatagoryIds = surgeryCatagoryIds;
 	}
 
@@ -197,15 +222,23 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		return surgeryCatagoryList;
 	}
 
-	public void setSurgeryCatagoryList(List<SurgeryCatagory> surgeryCatagoryList) {
+	void setSurgeryCatagoryList(List<SurgeryCatagory> surgeryCatagoryList) {
 		this.surgeryCatagoryList = surgeryCatagoryList;
+	}
+
+	public String getSurgeryNote() {
+		return surgeryNote;
+	}
+
+	void setSurgeryNote(String surgeryNote) {
+		this.surgeryNote = surgeryNote;
 	}
 
 	public String getNoteFromClient() {
 		return noteFromClient;
 	}
 
-	public void setNoteFromClient(String noteFromClient) {
+	void setNoteFromClient(String noteFromClient) {
 		this.noteFromClient = noteFromClient;
 	}
 
@@ -213,7 +246,7 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		return noteFromDr;
 	}
 
-	public void setNoteFromDr(String noteFromDr) {
+	void setNoteFromDr(String noteFromDr) {
 		this.noteFromDr = noteFromDr;
 	}
 
@@ -221,7 +254,7 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		return smallSurgery;
 	}
 
-	public void setSmallSurgery(String smallSurgery) {
+	void setSmallSurgery(String smallSurgery) {
 		this.smallSurgery = smallSurgery;
 	}
 
@@ -229,7 +262,7 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		return adviceFromDr;
 	}
 
-	public void setAdviceFromDr(String adviceFromDr) {
+	void setAdviceFromDr(String adviceFromDr) {
 		this.adviceFromDr = adviceFromDr;
 	}
 
@@ -237,7 +270,7 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		return picNames;
 	}
 
-	public void setPicNames(List<String> picNames) {
+	void setPicNames(List<String> picNames) {
 		this.picNames = picNames;
 	}
 
@@ -245,7 +278,7 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		return reExamInfo;
 	}
 
-	public void setReExamInfo(List<PatientCaseEntity> reExamInfo) {
+	void setReExamInfo(List<PatientCaseEntity> reExamInfo) {
 		this.reExamInfo = reExamInfo;
 	}
 
@@ -253,7 +286,7 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		return surgeryDateAsText;
 	}
 
-	public void setSurgeryDateAsText(String surgeryDateAsText) {
+	void setSurgeryDateAsText(String surgeryDateAsText) {
 		this.surgeryDateAsText = surgeryDateAsText;
 	}
 
@@ -261,31 +294,23 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		return surgeryDate;
 	}
 
-	public void setSurgeryDate(Date surgeryDate) {
+	void setSurgeryDate(Date surgeryDate) {
 		this.surgeryDate = surgeryDate;
 	}
 
-	public String getNextDateAsText() {
-		return nextDateAsText;
+	public AppointmentSchedule getAppoSchedule() {
+		return appoSchedule;
 	}
 
-	public void setNextDateAsText(String nextDateAsText) {
-		this.nextDateAsText = nextDateAsText;
-	}
-
-	public Date getNextDate() {
-		return nextDate;
-	}
-
-	public void setNextDate(Date nextDate) {
-		this.nextDate = nextDate;
+	void setAppoSchedule(AppointmentSchedule appoSchedule) {
+		this.appoSchedule = appoSchedule;
 	}
 
 	public boolean isComplication() {
 		return complication;
 	}
 
-	public void setComplication(boolean complication) {
+	void setComplication(boolean complication) {
 		this.complication = complication;
 	}
 
@@ -293,11 +318,11 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		return beautiful;
 	}
 
-	public void setBeautiful(boolean beautiful) {
+	void setBeautiful(boolean beautiful) {
 		this.beautiful = beautiful;
 	}
 
-	public void setDateAsText(String date) {
+	void setDateAsText(String date) {
 		this.dateAsText = date;
 		this.date = null;
 	}
@@ -313,9 +338,59 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		return date;
 	}
 
-	public void setDate(Date date) {
+	void setDate(Date date) {
 		this.date = date;
 		this.dateAsText = DateUtils.convertDateDataType(date);
 	}
-	
+
+	public String getPrognosticOther() {
+		return this.prognosticOther;
+	}
+
+	public String getDiagnoseOther() {
+		return this.diagnoseOther;
+	}
+
+	void setPrognosticOther(String prognosticOther) {
+		this.prognosticOther = prognosticOther;
+	}
+
+	void setDiagnoseOther(String diagnoseOther) {
+		this.diagnoseOther = diagnoseOther;
+	}
+
+	void updateData(DrCatagory drCat,
+			List<ServiceCatagory> serviceList,
+			List<PrognosticCatagory> progCatList, String prognosticOtherText,
+			List<DiagnoseCatagory> diagCatList, String diagOtherText,
+			String noteFromPa, String noteFromDr,
+			List<SurgeryCatagory> surList, String surgeryNote,
+			Date surgeryDate, boolean complication, boolean beauty,
+			String smallSurgery, String drAdvice, 
+			Date nextApp, AppointmentCatagory appPurpose, String appNote) {
+		this.setDr(drCat);
+		this.setServiceList(serviceList);
+		this.setPrognosticCatagoryList(progCatList);
+		this.setPrognosticOther(prognosticOtherText);
+		this.setDiagnoseCatagoryList(diagCatList);
+		this.setDiagnoseOther(diagOtherText);
+		this.setNoteFromClient(noteFromPa);
+		this.setNoteFromDr(noteFromDr);
+		this.setSurgeryCatagoryList(surList);
+		this.setSurgeryNote(surgeryNote);
+		this.setSurgeryDate(surgeryDate);
+		this.setComplication(complication);
+		this.setBeautiful(beauty);
+		this.setSmallSurgery(smallSurgery);
+		this.setAdviceFromDr(drAdvice);
+		
+		if (this.appoSchedule != null && appoSchedule.getId() != null) {
+			this.appoSchedule.setAppointmentCatagory(appPurpose);
+			this.appoSchedule.setAppointmentDate(nextApp);
+			this.appoSchedule.setNote(appNote);
+		} else {
+			this.setAppoSchedule(new AppointmentSchedule(nextApp, appPurpose, appNote));
+		}
+	}
+
 }

@@ -20,9 +20,9 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
 import com.lehanh.pama.ICatagoryManager;
-import com.lehanh.pama.IPatientManager;
 import com.lehanh.pama.catagory.Catagory;
 import com.lehanh.pama.catagory.CatagoryType;
+import com.lehanh.pama.patientcase.IPatientManager;
 import com.lehanh.pama.patientcase.IPatientViewPartListener;
 import com.lehanh.pama.patientcase.MedicalPersonalInfo;
 import com.lehanh.pama.patientcase.Patient;
@@ -348,11 +348,9 @@ public class PatientInfoView extends PamaFormUI implements IPatientViewPartListe
 		selectComboById(paLevelCombo, patient.getPatientLevel());
 		
 		MedicalPersonalInfo medicalPersonalInfo = patient.getMedicalPersonalInfo();
-		if (medicalPersonalInfo != null) {
-			setText(anamnesisText, medicalPersonalInfo.getAnamnesis());
-			setText(medicalHistoryText, medicalPersonalInfo.getMedicalHistory());
-			setText(detailExamText, medicalPersonalInfo.getPatientCaseSummary().getSummary(true));
-		}
+		setText(anamnesisText, medicalPersonalInfo.getAnamnesis());
+		setText(medicalHistoryText, medicalPersonalInfo.getMedicalHistory());
+		setText(detailExamText, medicalPersonalInfo.getPatientCaseSummary().getSummary(true));
 		
 		// TODO paImageLabel;
 	}
@@ -365,21 +363,21 @@ public class PatientInfoView extends PamaFormUI implements IPatientViewPartListe
 	}
 
 	private void save() {
+		int paLevel = -1;
+		Catagory selectedPaLevel = (Catagory) getValueFromCombo(paLevelCombo);
+		if (selectedPaLevel != null) {
+			paLevel = selectedPaLevel.getId().intValue();
+		}
+		
+		String detailExam = null;
+		if (isChanged(detailExamText)) {
+			detailExam = detailExamText.getText();
+		}
 		try {
 			/*
 			id, imagePath, name, address, birthDay, isFermale,
 			cellPhone, phone, email, career, patientLevel, note, medicalHistory, anamnesis
 			 */
-			int paLevel = -1;
-			Catagory selectedPaLevel = (Catagory) getValueFromCombo(paLevelCombo);
-			if (selectedPaLevel != null) {
-				paLevel = selectedPaLevel.getId().intValue();
-			}
-			String detailExam = null;
-			if (isChanged(detailExamText)) {
-				detailExam = detailExamText.getText();
-			}
-			
 			paManager.updatePatient(
 					null, // TODO ImageName
 					// personal info

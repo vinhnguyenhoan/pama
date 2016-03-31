@@ -65,20 +65,32 @@ class PatientCaseCatagoryComboViewer extends ACommonComboViewer {
 		if (model == null) {
 			return;
 		}
-		if (multiSelectionCatList.contains(model)) {
-			multiSelectionCatList.remove(model);
-		} else {
-			multiSelectionCatList.add(model);
-			//Collections.sort(multiSelectionCatList);
+		selectionChanged(Arrays.asList(model));
+	}
+	
+	void selectionChanged(List<? extends Catagory> catList) {
+		if (catList == null) {
+			return;
 		}
-
-		String selectionText = getSelectionText();
-
-		TableComboViewer viewer = ((TableComboViewer) event.getSource());
-		viewer.getTableCombo().setText(selectionText);
-		viewer.update(model, null);
-		
-		notifyDependViewers(dependViewers);
+		for (Catagory cat : catList) {
+			if (multiSelectionCatList.contains(cat)) {
+				multiSelectionCatList.remove(cat);
+			} else {
+				multiSelectionCatList.add(cat);
+				//Collections.sort(multiSelectionCatList);
+			}
+	
+			String selectionText = getSelectionText();
+	
+			tableComboViewer.getTableCombo().setText(selectionText);
+			tableComboViewer.update(cat, null);
+			
+			notifyDependViewers(dependViewers);
+		}
+	}
+	
+	List<? extends Catagory> getMultiSelectionCatList() {
+		return new LinkedList<Catagory>(this.multiSelectionCatList);
 	}
 	
 	private String getSelectionText() {
@@ -173,4 +185,5 @@ class PatientCaseCatagoryComboViewer extends ACommonComboViewer {
 			multiSelectionCatList.clear();
 		}
 	}
+
 }

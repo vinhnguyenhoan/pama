@@ -25,7 +25,11 @@ public class PamaWorkbenchErrorHandler extends WorkbenchErrorHandler {
             MessageBox dialog = 
 				  new MessageBox(Display.getCurrent().getActiveShell(), SWT.ICON_ERROR | SWT.OK);
 			dialog.setText("Lổi chương trình");
-			dialog.setMessage(statusAdapter.getStatus().getException().getMessage());
+			String messageError = statusAdapter.getStatus().getException().getMessage();
+			if (messageError == null) {
+				messageError = statusAdapter.getStatus().getException().toString();
+			}
+			dialog.setMessage(messageError);
 			dialog.open();
 	    } else {
 	    	super.handle(statusAdapter, style);

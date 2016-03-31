@@ -5,7 +5,7 @@ import java.util.HashMap;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.lehanh.pama.IJsonDataObject;
-import com.lehanh.pama.db.dao.JsonMapper;
+import com.lehanh.pama.util.JsonMapper;
 
 public class SurgeryCatagory extends Catagory implements IContainJsonDataCatagory, IJsonDataObject {
 

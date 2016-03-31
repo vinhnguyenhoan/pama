@@ -6,8 +6,8 @@ import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.lehanh.pama.db.dao.JsonMapper;
 import com.lehanh.pama.util.DateUtils;
+import com.lehanh.pama.util.JsonMapper;
 
 public class Patient {
 
@@ -45,11 +45,10 @@ public class Patient {
 	}
 	
 	public MedicalPersonalInfo getMedicalPersonalInfo() {
-		return medicalPersonalInfo;
-	}
-
-	public void setMedicalPersonalInfo(MedicalPersonalInfo medicalPersonalInfo) {
-		this.medicalPersonalInfo = medicalPersonalInfo;
+		if (this.medicalPersonalInfo == null) {
+			this.medicalPersonalInfo = new MedicalPersonalInfo();
+		}
+		return this.medicalPersonalInfo;
 	}
 
 	public String getName() {
@@ -200,5 +199,10 @@ public class Patient {
 			return null;
 		}
 		return JsonMapper.toJson(medicalPersonalInfo);
+	}
+
+	void reloadMedicalInfo() {
+		String json = JsonMapper.toJson(getMedicalPersonalInfo());
+		this.medicalPersonalInfo = JsonMapper.fromJson(json, MedicalPersonalInfo.class);
 	}
 }

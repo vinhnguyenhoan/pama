@@ -1,4 +1,4 @@
-package com.lehanh.pama.db.dao;
+package com.lehanh.pama.util;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

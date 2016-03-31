@@ -11,16 +11,20 @@ import java.util.TreeMap;
 import org.eclipse.swt.widgets.Display;
 
 import com.lehanh.pama.ICatagoryManager;
-import com.lehanh.pama.IPatientManager;
 import com.lehanh.pama.catagory.AppointmentCatagory;
 import com.lehanh.pama.catagory.Catagory;
 import com.lehanh.pama.catagory.CatagoryType;
+import com.lehanh.pama.catagory.DiagnoseCatagory;
+import com.lehanh.pama.catagory.DrCatagory;
+import com.lehanh.pama.catagory.PrognosticCatagory;
+import com.lehanh.pama.catagory.ServiceCatagory;
+import com.lehanh.pama.catagory.SurgeryCatagory;
 import com.lehanh.pama.db.dao.PatientDao;
 import com.lehanh.pama.db.dao.ScheduleDao;
 import com.lehanh.pama.util.PamaException;
 import com.lehanh.pama.util.PamaHome;
 
-public class PatientManager implements IPatientManager {
+public class PatientManager implements IPatientManager, IPatientSearcher, IAppointmentManager {
 
 	private List<AppointmentSchedule> listAppointmentToday;
 	
@@ -45,6 +49,9 @@ public class PatientManager implements IPatientManager {
 	
 	private final NotifyPaRunnable notifyPaRunnable = new NotifyPaRunnable();
 	
+	/* (non-Javadoc)
+	 * @see com.lehanh.pama.IService#initialize()
+	 */
 	@Override
 	public void initialize() throws SQLException {
 		catagoryManager = (ICatagoryManager) PamaHome.getService(ICatagoryManager.class);
@@ -73,6 +80,66 @@ public class PatientManager implements IPatientManager {
 	}
 
 	@Override
+	public IPatientSearcher getPatientSearcher() {
+		return this;
+	}
+
+	/////////////////////////////// com.lehanh.pama.patientcase.IPatientSearcher /////////////////////////////// 
+	/* (non-Javadoc)
+	 * @see com.lehanh.pama.patientcase.IPatientSearcher#getPatientDetailById(java.lang.Long)
+	 */
+	@Override
+	public Patient getPatientDetailById(Long id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.lehanh.pama.patientcase.IPatientSearcher#searchPatient(java.util.Date, java.util.Date, java.lang.String)
+	 */
+	@Override
+	public List<Patient> searchPatient(Date appointment, Date lastUpdate,
+			String name) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/////////////////////////////// com.lehanh.pama.patientcase.IAppointmentManager /////////////////////////////// 
+	@Override
+	public IAppointmentManager getAppointmentManager() {
+		return this;
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.lehanh.pama.patientcase.IAppointmentManager#searchPatientAppointmentToday(boolean)
+	 */
+	@Override
+	public List<Patient> searchPatientAppointmentToday(boolean forceReload) {
+		if (listAppointmentToday == null) {
+			try {
+				reloadAppointment();
+			} catch (SQLException e) {
+				throw new PamaException("Cannot reload appointment", e);
+			}
+		}
+		// TODO
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.lehanh.pama.patientcase.IAppointmentManager#clearOldAppointment()
+	 */
+	@Override
+	public int clearOldAppointment() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	
+	/////////////////////////////// com.lehanh.pama.patientcase.IPatientManager /////////////////////////////// 
+	/* (non-Javadoc)
+	 * @see com.lehanh.pama.patientcase.IPatientManager#updatePatient(java.lang.String, java.lang.String, java.lang.String, java.util.Date, boolean, java.lang.String, java.lang.String, java.lang.String, java.lang.String, int, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+	 */
+	@Override
 	public void updatePatient(String imagePath, String name, String address, Date birthDay, boolean isFermale,
 			String cellPhone, String phone, String email, String career, int patientLevel, String note,  String detailExam,
 			String medicalHistory, String anamnesis) {
@@ -94,14 +161,10 @@ public class PatientManager implements IPatientManager {
 		MedicalPersonalInfo medicalPersonalInfo = null;
 		if (patientSelected != null) {
 			medicalPersonalInfo = patientSelected.getMedicalPersonalInfo();
+			medicalPersonalInfo.setAnamnesis(anamnesis);
+			medicalPersonalInfo.setMedicalHistory(medicalHistory);
+			medicalPersonalInfo.setPatientCaseSummary(detailExam);
 		}
-		if (medicalPersonalInfo == null) {
-			medicalPersonalInfo = new MedicalPersonalInfo();
-		}
-		medicalPersonalInfo.setAnamnesis(anamnesis);
-		medicalPersonalInfo.setMedicalHistory(medicalHistory);
-		medicalPersonalInfo.setPatientCaseSummary(detailExam);
-		result.setMedicalPersonalInfo(medicalPersonalInfo);
 		
 		try {
 			if (result.getId() == null) {
@@ -113,62 +176,84 @@ public class PatientManager implements IPatientManager {
 			throw new PamaException("Lổi cập nhật DB: " + e.getMessage());
 		}
 		notifyPaListener(patientSelected, result, paListeners);
-		this.patientSelected = result;
+		this.patientSelected = result; // update patientSelected before call cancelEditing
+		cancelEditingPatientCase();
 	}
 	
 	private void notifyPaListener(final Patient oldPa, final Patient newPa, final List<IPatientViewPartListener> paListeners) {
 		notifyPaRunnable.oldPa = oldPa;
 		notifyPaRunnable.newPa = newPa;
-		Display.getCurrent().asyncExec(notifyPaRunnable );
+		Display.getCurrent().asyncExec(notifyPaRunnable);
 	}
 
+	/* (non-Javadoc)
+	 * @see com.lehanh.pama.patientcase.IPatientManager#addPaListener(com.lehanh.pama.patientcase.IPatientViewPartListener)
+	 */
 	@Override
 	public synchronized void addPaListener(IPatientViewPartListener paL) {
 		this.paListeners.add(paL);
 	}
 	
-	@Override
-	public Patient updateImage(String image) {
-		
-		return null;
-	}
-	
-	
-	@Override
-	public Patient getPatientDetailById(Long id) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Patient> searchPatient(Date appointment, Date lastUpdate,
-			String name) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Patient> searchPatientAppointmentToday(boolean forceReload) {
-		if (listAppointmentToday == null) {
-			try {
-				reloadAppointment();
-			} catch (SQLException e) {
-				throw new PamaException("Cannot reload appointment", e);
-			}
-		}
-		// TODO
-		return null;
-	}
-
-	@Override
-	public int clearOldAppointment() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
+	/* (non-Javadoc)
+	 * @see com.lehanh.pama.patientcase.IPatientManager#getCurrentPatient()
+	 */
 	@Override
 	public Patient getCurrentPatient() {
 		return this.patientSelected;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.lehanh.pama.patientcase.IPatientManager#updatePatientCase(com.lehanh.pama.patientcase.PatientCaseEntity, com.lehanh.pama.catagory.DrCatagory, java.util.List, java.util.List, java.lang.String, java.util.List, java.lang.String, java.lang.String, java.lang.String, java.util.List, java.lang.String, java.util.Date, boolean, boolean, java.lang.String, java.lang.String, java.util.Date, com.lehanh.pama.catagory.AppointmentCatagory, java.lang.String)
+	 */
+	@Override
+	public void updatePatientCase(PatientCaseEntity paCaseEntity,
+			DrCatagory drCat, List<ServiceCatagory> serviceList,
+			List<PrognosticCatagory> progCatList, String prognosticOtherText,
+			List<DiagnoseCatagory> diagCatList, String diagOtherText,
+			String noteFromPa, String noteFromDr,
+			List<SurgeryCatagory> surList, String surgeryNote,
+			Date surgeryDate, boolean complication, boolean beauty,
+			String smallSurgery, String drAdvice, Date nextApp,
+			AppointmentCatagory appPurpose, String appNote) {
+		
+		if (patientSelected == null) {
+			throw new IllegalAccessError("Chưa chọn bệnh nhân");
+		}
+
+		MedicalPersonalInfo medicalPersonalInfo = patientSelected.getMedicalPersonalInfo();
+		medicalPersonalInfo.getPatientCaseList()
+								.updateCase(paCaseEntity, drCat, serviceList, progCatList, prognosticOtherText,
+										diagCatList, diagOtherText, noteFromPa, noteFromDr, surList, surgeryNote,
+										surgeryDate, complication, beauty, smallSurgery, drAdvice, nextApp,
+										appPurpose, appNote);
+		try {
+			new PatientDao().update(patientSelected);
+		
+			AppointmentSchedule appSche = paCaseEntity.getAppoSchedule();
+			if (appSche.getId() == null) {
+				appSche.setPatientId(patientSelected.getId());
+				new ScheduleDao().insert(appSche);
+			} else {
+				new ScheduleDao().update(appSche);
+			}
+		} catch (SQLException e) {
+			throw new PamaException("Lổi cập nhật DB: " + e.getMessage());
+		}
+		cancelEditingPatientCase();
+		notifyPaListener(patientSelected, patientSelected, paListeners);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.lehanh.pama.patientcase.IPatientManager#createEmptyCase(com.lehanh.pama.patientcase.PatientCaseStatus)
+	 */
+	@Override
+	public void createEmptyCase(PatientCaseStatus status) {
+		 ((PatientCaseList) getCurrentPatient().getMedicalPersonalInfo().getPatientCaseList()).createEmptyCase(status);
+	}
+
+	@Override
+	public void cancelEditingPatientCase() {
+		getCurrentPatient().reloadMedicalInfo();
 	}
 
 }

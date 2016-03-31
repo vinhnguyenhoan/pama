@@ -1,5 +1,6 @@
 package com.lehanh.pama.ui.util;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -80,9 +81,12 @@ public class UIControlUtils {
 		combo.select(startIndex);
 	}
 
-	public static void setText(Text mobiText, String cellPhone) {
-		// TODO Auto-generated method stub
-		
+	public static void setText(Text textControl, String textContent) {
+		if (textContent == null) {
+			textControl.setText(StringUtils.EMPTY);
+		} else {
+			textControl.setText(textContent);
+		}
 	}
 
 //	public static void initialCombo(TableComboViewer combo,

@@ -1,5 +1,8 @@
 package com.lehanh.pama.ui.patientcase;
 
+import java.security.InvalidParameterException;
+import java.util.List;
+
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -21,21 +24,32 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
 import com.lehanh.pama.ICatagoryManager;
-import com.lehanh.pama.IPatientManager;
+import com.lehanh.pama.catagory.AppointmentCatagory;
 import com.lehanh.pama.catagory.CatagoryType;
+import com.lehanh.pama.catagory.DiagnoseCatagory;
+import com.lehanh.pama.catagory.DrCatagory;
+import com.lehanh.pama.catagory.PrognosticCatagory;
+import com.lehanh.pama.catagory.ServiceCatagory;
+import com.lehanh.pama.catagory.SurgeryCatagory;
+import com.lehanh.pama.patientcase.AppointmentSchedule;
+import com.lehanh.pama.patientcase.IPatientCaseList;
+import com.lehanh.pama.patientcase.IPatientManager;
 import com.lehanh.pama.patientcase.IPatientViewPartListener;
 import com.lehanh.pama.patientcase.MedicalPersonalInfo;
 import com.lehanh.pama.patientcase.Patient;
 import com.lehanh.pama.patientcase.PatientCaseEntity;
+import com.lehanh.pama.patientcase.PatientCaseStatus;
 import com.lehanh.pama.ui.PamaFormUI;
 import com.lehanh.pama.ui.util.CatagoryToUIText;
-import com.lehanh.pama.ui.util.UIControlUtils;
 import com.lehanh.pama.util.PamaHome;
+
+import static com.lehanh.pama.ui.util.UIControlUtils.*;
 
 public class PatientCaseView extends PamaFormUI implements IPatientViewPartListener {
 	
@@ -60,6 +74,7 @@ public class PatientCaseView extends PamaFormUI implements IPatientViewPartListe
 	private CDateTime surgeryDateCDate;
 	private Button complicationCheckBtn;
 	private Button beautyBut;
+	
 	private Button adviceBtn;
 	private Button newCaseBtn;
 	private Button reExamBtn;
@@ -76,6 +91,12 @@ public class PatientCaseView extends PamaFormUI implements IPatientViewPartListe
 	private ICatagoryManager catManager;
 	
 	private IPatientManager paManager;
+	
+	private ExamVersionComboViewer examCombo;
+	private PatientCaseCatagoryComboViewer serviceCatComboViewer;
+	private PatientCaseCatagoryComboViewer surgeryCatComboViewer;
+	private PatientCaseCatagoryComboViewer diagnoseCatComboViewer;
+	private PatientCaseCatagoryComboViewer prognosticCatComboViewer;
 	
 	public PatientCaseView() {
 		catManager = (ICatagoryManager) PamaHome.getService(ICatagoryManager.class);
@@ -403,7 +424,7 @@ public class PatientCaseView extends PamaFormUI implements IPatientViewPartListe
 		grey = Display.getCurrent().getSystemColor(SWT.COLOR_GRAY);
 		
 		// initial versions
-		new ExamVersionComboViewer(this.examVersionTComboViewer, grey);
+		this.examCombo = new ExamVersionComboViewer(this.examVersionTComboViewer, grey);
 		examVersionTComboViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
@@ -412,113 +433,120 @@ public class PatientCaseView extends PamaFormUI implements IPatientViewPartListe
 				if (model == null) {
 					return;
 				}
-				handleData(model);
+				viewData(model);
 			}
 		});
 
 		// initial Combo values
-		UIControlUtils.initialCombo(drCombo, catManager.getCatagoryByType(CatagoryType.DR).values(), "Chọn BS", 0,
+		initialCombo(drCombo, catManager.getCatagoryByType(CatagoryType.DR).values(), "Chọn BS", 0,
 				new CatagoryToUIText());
-		UIControlUtils.initialCombo(appPurposrCombo, catManager.getCatagoryByType(CatagoryType.APPOINTMENT).values(), "Chọn", 0,
+		initialCombo(appPurposrCombo, catManager.getCatagoryByType(CatagoryType.APPOINTMENT).values(), "Chọn", 0,
 				new CatagoryToUIText());
 		
-		PatientCaseCatagoryComboViewer surgeryViewer = new PatientCaseCatagoryComboViewer(catManager, grey, surgeryTComboViewer, CatagoryType.SURGERY);
-		PatientCaseCatagoryComboViewer diagnoseViewer = new PatientCaseCatagoryComboViewer(catManager, grey, diagnoseTComboViewer, CatagoryType.DIAGNOSE, surgeryViewer);
-		PatientCaseCatagoryComboViewer prognostiViewer = new PatientCaseCatagoryComboViewer(catManager, grey, prognosticTComboViewer, CatagoryType.PROGNOSTIC, diagnoseViewer, surgeryViewer);
-		new PatientCaseCatagoryComboViewer(catManager, true, grey, serviceTComboViewer, CatagoryType.SERVICE, prognostiViewer, diagnoseViewer, surgeryViewer);
-
+		this.surgeryCatComboViewer = new PatientCaseCatagoryComboViewer(catManager, grey, surgeryTComboViewer, CatagoryType.SURGERY);
+		this.diagnoseCatComboViewer = new PatientCaseCatagoryComboViewer(catManager, grey, diagnoseTComboViewer, CatagoryType.DIAGNOSE, surgeryCatComboViewer);
+		this.prognosticCatComboViewer = new PatientCaseCatagoryComboViewer(catManager, grey, prognosticTComboViewer, CatagoryType.PROGNOSTIC, diagnoseCatComboViewer, surgeryCatComboViewer);
+		this.serviceCatComboViewer = new PatientCaseCatagoryComboViewer(catManager, true, grey, serviceTComboViewer, CatagoryType.SERVICE, prognosticCatComboViewer, diagnoseCatComboViewer, surgeryCatComboViewer);
 	}
 
-	private void handleData(PatientCaseEntity model) {
-		if (model == null) {
-			return;
-		}
-		
-		// TODO fill data to controls
-		
-		getFormManager().edit();
-	}
-
-	private void handleData(Patient patient) {
+	private void viewData(Patient patient) {
 		if (patient == null) {
 			return;
 		}
 		
 		MedicalPersonalInfo mInfo = patient.getMedicalPersonalInfo();
-		if (mInfo == null || mInfo.isEmptyVersions()) {
-			cancel();
+		// initial versions combo
+		examVersionTComboViewer.setInput(mInfo.getPatientCaseList());
+		IPatientCaseList paList = mInfo.getPatientCaseList();
+		if (paList.isEmptyVersions()) {
+			getFormManager().cancel(false);
+			return;
+		}
+
+		final PatientCaseEntity lastExam = paList.getLastExamByStatus(PatientCaseStatus.values());
+		// clear form and allow edit form
+		getFormManager().cancel(true)
+						// after cancel then enable again to selectable versions list
+						.setEditable(true, examVersionTComboViewer.getTableCombo());
+		// show exam
+		viewData(lastExam);
+	}
+	
+	private void viewData(PatientCaseEntity model) {
+		if (model == null) {
 			return;
 		}
 		
-		// initial versions combo
-		examVersionTComboViewer.setInput(mInfo.getPatientCaseList());
-		// clear form
-		getFormManager().cancel(false)
-						// enable to selectable versions list
-						.setEditable(true, examVersionTComboViewer.getTableCombo());
-	}
-	
-//	private Patient createOrUpdateDataFromUI(Patient currPatient) throws InvalidInputFormException {
-//		if (currPatient == null) {
-//			currPatient = new Patient();
-//		}
-//		try {
-//			updateFromUI(currPatient);
-//		} catch (InvalidParameterException e) {
-//			throw new InvalidInputFormException(e.getMessage());
-//		}
-//		return currPatient;
-//	}
-//
-//	private void updateFromUI(Patient currPatient) {
-//		currPatient.setCellPhone(mobiText.getText());
-//		currPatient.setPhone(phoneText.getText());
-//		currPatient.setName(nameText.getText());
-//		currPatient.setAddress(addText.getText());
-//		currPatient.setEmail(emailText.getText());
-//		currPatient.setCareer(careerText.getText());
-//
-//		currPatient.setBirthDay(birthDayCalendar.getSelection());
-//		
-//		currPatient.setNote(paNoteText.getText());
-//		Catagory selectedPaLevel = (Catagory) UIControlUtils.getValueFromCombo(paLevelCombo);
-//		if (selectedPaLevel != null) {
-//			currPatient.setPatientLevel(selectedPaLevel.getId().intValue());
-//		} else {
-//			currPatient.setPatientLevel(-1);
-//		}
-//		
-//		MedicalPersonalInfo medicalPersonalInfo = currPatient.getMedicalPersonalInfo();
-//		if (medicalPersonalInfo == null) {
-//			medicalPersonalInfo = new MedicalPersonalInfo();
-//		}
-//		medicalPersonalInfo.setAnamnesis(anamnesisText.getText());
-//		medicalPersonalInfo.setMedicalHistory(medicalHistoryText.getText());
-//		if (UIControlUtils.isChanged(detailExamText)) {
-//			medicalPersonalInfo.setPatientCaseSummary(detailExamText.getText());
-//		}
-//	}
-	
-	private void cancel() {
-		// cancel form and clear form
-		getFormManager().cancel(paManager.getCurrentPatient() != null);
-		// revert if exist patient
-		// TODO handleData(paManager.getCurrentPatient());
+		this.examCombo.selectionChanged(model);
+		selectComboById(this.drCombo, model.getDrId());
+		this.serviceCatComboViewer.selectionChanged(model.getServiceList());
+		this.prognosticCatComboViewer.selectionChanged(model.getPrognosticCatagoryList());
+		setText(this.prognosticOtherText, model.getPrognosticOther());
+		this.diagnoseCatComboViewer.selectionChanged(model.getDiagnoseCatagoryList());
+		setText(this.diagnoseOtherText, model.getDiagnoseOther());
+		setText(this.noteFromPaText, model.getNoteFromClient());
+		setText(this.noteFromDrText, model.getNoteFromDr());
+		this.surgeryCatComboViewer.selectionChanged(model.getSurgeryCatagoryList());
+		setText(this.surgeryNoteText, model.getSurgeryNote());
+		this.surgeryDateCDate.setSelection(model.getSurgeryDate());
+		this.complicationCheckBtn.setSelection(model.isComplication());
+		this.beautyBut.setSelection(model.isBeautiful());
+		setText(this.smallSurgeryText, model.getSmallSurgery());
+		setText(this.drAdviceText, model.getAdviceFromDr());
+		
+		this.viewData(model.getAppoSchedule());
+		
+		getFormManager().edit();
 	}
 
+	private void viewData(AppointmentSchedule appoSchedule) {
+		if (appoSchedule == null) {
+			return; // sure that appointment controls cleared date before
+		}
+		this.nextAppCDate.setSelection(appoSchedule.getAppointmentDate());
+		selectComboById(this.appPurposrCombo, appoSchedule.getAppointmentCatagory().getId());
+		setText(this.appNoteText, appoSchedule.getNote());
+	}
+	
+	private void cancel() {
+		paManager.cancelEditingPatientCase();
+		// show again patient info as a viewing status
+		viewData(paManager.getCurrentPatient());
+	}
+
+	@SuppressWarnings("unchecked")
 	private void save() {
-//		try {
-			// TODO Patient patient = createOrUpdateDataFromUI(paManager.getCurrentPatient());
-			// TODO save to DB
-			// TODO paManager.updatePatient(id, imagePath, name, address, birthDay, isFermale, cellPhone, phone, email, career, patientLevel, note, medicalHistory, anamnesis)
-			getFormManager().saved(paManager.getCurrentPatient() != null);
-//		} catch (InvalidInputFormException e) {
-//			MessageBox dialog = 
-//				  new MessageBox(composite.getShell(), SWT.ICON_ERROR | SWT.OK);
-//			dialog.setText("Lổi nhập liệu");
-//			dialog.setMessage(e.getMessage());
-//			dialog.open();
-//		}
+		try {
+			paManager.updatePatientCase(this.examCombo.getSelectedEntity(),
+										(DrCatagory) getValueFromCombo(this.drCombo),
+										(List<ServiceCatagory>) this.serviceCatComboViewer.getMultiSelectionCatList(),
+										(List<PrognosticCatagory>) this.prognosticCatComboViewer.getMultiSelectionCatList(),
+										this.prognosticOtherText.getText(),
+										(List<DiagnoseCatagory>) this.diagnoseCatComboViewer.getMultiSelectionCatList(),
+										this.diagnoseOtherText.getText(),
+										this.noteFromPaText.getText(),
+										this.noteFromDrText.getText(),
+										(List<SurgeryCatagory>) this.surgeryCatComboViewer.getMultiSelectionCatList(),
+										this.surgeryNoteText.getText(),
+										this.surgeryDateCDate.getSelection(),
+										this.complicationCheckBtn.getSelection(),
+										this.beautyBut.getSelection(),
+										this.smallSurgeryText.getText(),
+										this.drAdviceText.getText(),
+										this.nextAppCDate.getSelection(),
+										(AppointmentCatagory) getValueFromCombo(this.appPurposrCombo),
+										this.appNoteText.getText());
+			
+		} catch (InvalidParameterException e) {
+			MessageBox dialog = 
+				  new MessageBox(composite.getShell(), SWT.ICON_ERROR | SWT.OK);
+			dialog.setText("Lổi nhập liệu");
+			dialog.setMessage(e.getMessage());
+			dialog.open();
+			return;
+		}
+		
+		getFormManager().saved(paManager.getCurrentPatient() != null);
 	}
 
 	private void update() {
@@ -528,31 +556,40 @@ public class PatientCaseView extends PamaFormUI implements IPatientViewPartListe
 
 	private void reExam() {
 		// do nothing for data
-		getFormManager().addNew();
-		// TODO 
+		newAction(PatientCaseStatus.RE_EXAM);
 	}
 
 	private void newCase() {
 		// do nothing for data
-		getFormManager().addNew();
-		// TODO 
+		newAction(PatientCaseStatus.SURGERY);
 	}
 
 	private void advice() {
 		// do nothing for data
-		getFormManager().addNew();
-		// TODO 
+		newAction(PatientCaseStatus.CONSULT);
+	}
+
+	private void newAction(PatientCaseStatus status) {
+		this.paManager.createEmptyCase(status);
+		
+		// view patient and view lasest exam is creating exam case
+		viewData(this.paManager.getCurrentPatient());
+		// switch form to editing -> enable all controls
+		update();
+		// make sure disable exam combo
+		examVersionTComboViewer.getTableCombo().setEnabled(false);
 	}
 
 	@Override
 	public void setFocus() {
-		handleData(paManager.getCurrentPatient());
+		viewData(paManager.getCurrentPatient());
+		// TODO handle viewpart focus out while editing form
+		// TODO handle viewpart focus in while it is not visible
 	}
 
 	@Override
 	public void patientChanged(Patient oldPa, Patient newPa) {
-		// TODO 
-		handleData(newPa);
+		viewData(newPa);
 	}
 
 }

@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.Map;
 
 import com.lehanh.pama.ICatagoryManager;
-import com.lehanh.pama.IPatientManager;
 import com.lehanh.pama.IService;
 import com.lehanh.pama.PamaApplication;
 import com.lehanh.pama.catagory.CatagoryManager;
 import com.lehanh.pama.db.DatabaseManager;
+import com.lehanh.pama.patientcase.IPatientManager;
 import com.lehanh.pama.patientcase.PatientManager;
 
 public class PamaHome {

@@ -1,13 +1,15 @@
 package com.lehanh.pama.ui.patientcase;
 
-import java.util.Collection;
-
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.nebula.jface.tablecomboviewer.TableComboViewer;
+import org.eclipse.nebula.widgets.tablecombo.TableCombo;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.wb.swt.SWTResourceManager;
 
 import com.lehanh.pama.patientcase.IPatientCaseList;
 import com.lehanh.pama.patientcase.PatientCaseEntity;
@@ -52,9 +54,19 @@ class ExamVersionComboViewer extends ACommonComboViewer {
 		return "";
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.lehanh.pama.ui.util.ACommonComboViewer#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
+	 */
 	@Override
 	public void selectionChanged(SelectionChangedEvent event) {
 		PatientCaseEntity model = (PatientCaseEntity) ((IStructuredSelection) event.getSelection()).getFirstElement();
+		if (model == null) {
+			return;
+		}
+		selectionChanged(model);
+	}
+	
+	void selectionChanged(PatientCaseEntity model) {
 		if (model == null) {
 			return;
 		}
@@ -62,41 +74,52 @@ class ExamVersionComboViewer extends ACommonComboViewer {
 
 		String selectionText = getSelectionText(selectedEntity);
 
-		TableComboViewer viewer = ((TableComboViewer) event.getSource());
-		viewer.getTableCombo().setText(selectionText);
-		viewer.update(model, null);
+		this.tableComboViewer.getTableCombo().setText(selectionText);
+		this.tableComboViewer.update(model, null);
 	}
 	
 	private String getSelectionText(PatientCaseEntity selectedEntity) {
-		if (this.patientCaseList == null) {
-			return StringUtils.EMPTY;
+		String lastExamText = StringUtils.EMPTY;
+		if (this.patientCaseList.isLastExam(selectedEntity)) {
+			lastExamText = " (lần gần nhất)";
+		} else if (this.patientCaseList.isCreatingExam(selectedEntity)) {
+			lastExamText = " (đang thực hiện)";
 		}
-		String selectionText = selectedEntity.getDateAsText() + " - " + selectedEntity.getStatusEnum().desc
-								+ (this.patientCaseList.isLastExam(selectedEntity) ? " (lần gần nhất)" : "");
+		String selectionText = selectedEntity.getDateAsText() 
+									+ " - " + selectedEntity.getStatusEnum().desc + lastExamText;
 		return selectionText;
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.lehanh.pama.ui.util.ACommonComboViewer#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
+	 */
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		this.patientCaseList = (IPatientCaseList) newInput;
-		((TableComboViewer) viewer).getTableCombo().setText(StringUtils.EMPTY);
-		selectedEntity = null;
+		TableCombo tableCombo = ((TableComboViewer) viewer).getTableCombo();
+		if (newInput instanceof IPatientCaseList) {
+        	this.patientCaseList = (IPatientCaseList) newInput;
+        	this.selectedEntity = null;
+        	tableCombo.setText(StringUtils.EMPTY);
+        }
 	}
 
+	/* (non-Javadoc)
+	 * @see com.lehanh.pama.ui.util.ACommonComboViewer#getElements(java.lang.Object)
+	 */
 	@Override
 	public Object[] getElements(Object inputElement) {
-		if (inputElement instanceof Object[]) {
-			return (Object[]) inputElement;
-		}
         if (inputElement instanceof IPatientCaseList) {
-			return ((IPatientCaseList) inputElement).getAllVersions();
+        	Object[] allVers = ((IPatientCaseList) inputElement).getAllVersions();
+        	return allVers;
 		}
+        
         return null;
 	}
 	
 	/* (non-Javadoc) 
 	 * @see org.eclipse.jface.viewers.ITableColorProvider#getBackground(java.lang.Object, int)
 	 */
+	@Override
 	public Color getBackground(Object element, int columnIndex) {
 		if (isSelected(element)) {
 			return backgroundSelected;
@@ -106,6 +129,25 @@ class ExamVersionComboViewer extends ACommonComboViewer {
 	
 	private boolean isSelected(Object element) {
 		return selectedEntity != null && selectedEntity == element;
+	}
+
+	PatientCaseEntity getSelectedEntity() {
+		return selectedEntity;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.ITableFontProvider#getFont(java.lang.Object, int)
+	 */
+	@Override
+	public Font getFont(Object element, int index) {
+		PatientCaseEntity model = (PatientCaseEntity) element;
+		if (model == null) {
+			return null;
+		}
+		if (StringUtils.isBlank(model.getDateAsText())) {
+			return SWTResourceManager.getFont("Segoe UI", 9, SWT.ITALIC);
+		}
+		return null;
 	}
 
 }
