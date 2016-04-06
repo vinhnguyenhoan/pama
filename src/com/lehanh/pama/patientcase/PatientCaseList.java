@@ -7,13 +7,17 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import com.lehanh.pama.catagory.AppointmentCatagory;
+import com.lehanh.pama.catagory.Catagory;
 import com.lehanh.pama.catagory.DiagnoseCatagory;
 import com.lehanh.pama.catagory.DrCatagory;
 import com.lehanh.pama.catagory.PrognosticCatagory;
 import com.lehanh.pama.catagory.ServiceCatagory;
 import com.lehanh.pama.catagory.SurgeryCatagory;
+import com.lehanh.pama.ui.util.ObjectToUIText;
 import com.lehanh.pama.util.DateUtils;
 import com.lehanh.pama.util.PamaException;
 
@@ -73,8 +77,8 @@ public class PatientCaseList implements IPatientCaseList {
 			paCaseEntity.setId(patientCases.size());
 			patientCases.add(0, paCaseEntity);
 		}
-		paCaseEntity.updateData(drCat, serviceList, progCatList, prognosticOtherText,
-				diagCatList, diagOtherText, noteFromPa, noteFromDr, surList, surgeryNote,
+		paCaseEntity.updateData(drCat == null ? null : drCat.getId(), Catagory.getListName(serviceList), Catagory.getListName(progCatList), prognosticOtherText,
+				Catagory.getListName(diagCatList), diagOtherText, noteFromPa, noteFromDr, Catagory.getListName(surList), surgeryNote,
 				surgeryDate, complication, beauty, smallSurgery, drAdvice, nextApp,
 				appPurpose, appNote);
 	}
@@ -87,10 +91,10 @@ public class PatientCaseList implements IPatientCaseList {
 		if (PatientCaseStatus.RE_EXAM == status) {
 			// set default value from previous version for re exam
 			PatientCaseEntity previousVersion = getLastExamByStatus(PatientCaseStatus.RE_EXAM, PatientCaseStatus.SURGERY);
-			creatingExamCase.setServiceList(previousVersion.getServiceList());
-			creatingExamCase.setPrognosticCatagoryList(previousVersion.getPrognosticCatagoryList());
-			creatingExamCase.setDiagnoseCatagoryList(previousVersion.getDiagnoseCatagoryList());
-			creatingExamCase.setSurgeryCatagoryList(previousVersion.getSurgeryCatagoryList());
+			creatingExamCase.setServiceNames(previousVersion.getServiceNames());
+			creatingExamCase.setPrognosticCatagoryNames(previousVersion.getPrognosticCatagoryNames());
+			creatingExamCase.setDiagnoseCatagoryNames(previousVersion.getDiagnoseCatagoryNames());
+			creatingExamCase.setSurgeryCatagoryNames(previousVersion.getSurgeryCatagoryNames() );
 		}
 		return creatingExamCase;
 	}
@@ -129,5 +133,16 @@ public class PatientCaseList implements IPatientCaseList {
 	@Override
 	public boolean isCreatingExam(PatientCaseEntity entity) {
 		return this.creatingExamCase != null && this.creatingExamCase == entity;
+	}
+
+	@Override
+	public Map<String, Map<String, Map<String, Object>>> getAllImageGroup(ObjectToUIText<PatientCaseEntity, Integer> objToText) {
+		Map<String, Map<String, Map<String, Object>>> result = new TreeMap<String, Map<String,Map<String,Object>>>();
+		Map<String, Map<String, Object>> entityImages = null;
+		for (PatientCaseEntity entity : this.patientCases) {
+			entityImages = new TreeMap<String, Map<String,Object>>(entity.getPicInfos());
+			result.put(objToText.showUI(entity), entityImages);
+		}
+		return result;
 	}
 }

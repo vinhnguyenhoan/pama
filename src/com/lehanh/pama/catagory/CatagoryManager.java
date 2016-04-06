@@ -16,6 +16,34 @@ public class CatagoryManager implements ICatagoryManager {
 
 	private final Map<CatagoryType, TreeMap<Long, Catagory>> allCatagory = new HashMap<CatagoryType, TreeMap<Long, Catagory>>();
 	
+	/*private class TextAndNumberKey {
+		
+		private String text;
+		private Long number;
+		
+		@Override
+		public int hashCode() {
+			return (text == null ? 0 : text.hashCode()) + (number == null ? 0 : number.hashCode());
+		}
+		
+		@Override
+		public boolean equals(Object other) {
+			if (other == null) {
+				return false;
+			}
+			if (getClass() != other.getClass()) {
+	            return false;
+			}
+			
+			TextAndNumberKey otherTaN = (TextAndNumberKey) other;
+			if (otherTaN.text == null && otherTaN.number == null) {
+				return false;
+			}
+			
+			return (otherTaN.text == null ? true : otherTaN.text.equals(text)) && (otherTaN.number == null ? true : otherTaN.number.equals(number));
+		}
+	}*/
+	
 	@Override
 	public void initialize() throws SQLException {
 		List<Catagory> allCat = new CatagoryDao().loadAllCatagory();

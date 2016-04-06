@@ -71,7 +71,7 @@ public class PatientCaseSummary implements Serializable, IJsonDataObject {
 				++index;
 				result.append(String.valueOf(index)).append(") Tư vấn (").append(dateEvent).append(")")
 					  .append(System.lineSeparator());
-			} else {
+			} else if (pE.getReExamInfo() != null) {
 				++index;
 				result.append(String.valueOf(index)).append(") Khám (").append(dateEvent).append(")")
 				      .append(System.lineSeparator());

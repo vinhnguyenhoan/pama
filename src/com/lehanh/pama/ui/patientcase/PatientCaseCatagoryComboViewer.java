@@ -26,7 +26,9 @@ class PatientCaseCatagoryComboViewer extends ACommonComboViewer {
 	private TableComboViewer tableComboViewer;
 	private ICatagoryManager catManager;
 	
-	private List<Catagory> multiSelectionCatList = new LinkedList<Catagory>();
+	private TreeMap<String, Catagory> multiSelectionCatList = new TreeMap<String, Catagory>();
+	private TreeMap<String, Catagory> input = new TreeMap<String, Catagory>();
+	
 	private List<PatientCaseCatagoryComboViewer> dependViewers;
 	private Color backgroundSelected;
 	
@@ -65,36 +67,39 @@ class PatientCaseCatagoryComboViewer extends ACommonComboViewer {
 		if (model == null) {
 			return;
 		}
-		selectionChanged(Arrays.asList(model));
+		selectionChanged(Arrays.asList(model.getName()));
 	}
 	
-	void selectionChanged(List<? extends Catagory> catList) {
-		if (catList == null) {
+	void selectionChanged(List<String> catNameList) {
+		if (catNameList == null || input == null || input.isEmpty()) {
 			return;
 		}
-		for (Catagory cat : catList) {
-			if (multiSelectionCatList.contains(cat)) {
-				multiSelectionCatList.remove(cat);
+		for (String catName : catNameList) {
+			Catagory cat = input.get(catName);// getCatByName(multiSelectionCatList, catName);
+			if (multiSelectionCatList.containsKey(catName)) {
+				multiSelectionCatList.remove(catName);
 			} else {
-				multiSelectionCatList.add(cat);
-				//Collections.sort(multiSelectionCatList);
+				multiSelectionCatList.put(catName, cat);
 			}
 	
-			String selectionText = getSelectionText();
-	
-			tableComboViewer.getTableCombo().setText(selectionText);
 			tableComboViewer.update(cat, null);
-			
-			notifyDependViewers(dependViewers);
 		}
+		String selectionText = getSelectionText(multiSelectionCatList);
+		
+		tableComboViewer.getTableCombo().setText(selectionText);
+		
+		notifyDependViewers(dependViewers, multiSelectionCatList);
 	}
 	
 	List<? extends Catagory> getMultiSelectionCatList() {
-		return new LinkedList<Catagory>(this.multiSelectionCatList);
+		return new LinkedList<Catagory>(this.multiSelectionCatList.values());
 	}
 	
-	private String getSelectionText() {
-		Iterator<Catagory> it = multiSelectionCatList.iterator();
+	private String getSelectionText(TreeMap<String, Catagory> multiSelectionCatList) {
+		if (multiSelectionCatList == null) {
+			return StringUtils.EMPTY;
+		}
+		Iterator<Catagory> it = multiSelectionCatList.values().iterator();
 		String selectionText = "";
 		if (it.hasNext()) {
 			selectionText += it.next().getDesc();
@@ -105,16 +110,16 @@ class PatientCaseCatagoryComboViewer extends ACommonComboViewer {
 		return selectionText;
 	}
 	
-	private void notifyDependViewers(List<PatientCaseCatagoryComboViewer> dependViewers) {
+	private void notifyDependViewers(List<PatientCaseCatagoryComboViewer> dependViewers, TreeMap<String, Catagory> multiSelectionCatList) {
 		if (dependViewers == null) {
 			return;
 		}
 		for (PatientCaseCatagoryComboViewer dependViewer : dependViewers) {
-			dependViewer.changedByParent(type, multiSelectionCatList);
+			dependViewer.changedByParent(type, multiSelectionCatList == null ? null : multiSelectionCatList.values());
 		}
 	}
 
-	private void changedByParent(CatagoryType typeChanged, List<Catagory> multiSelectionCatList) {
+	private void changedByParent(CatagoryType typeChanged, Collection<Catagory> multiSelectionCatList) {
 		if (multiSelectionCatList == null || multiSelectionCatList.isEmpty() || typeChanged != this.type.getParentCatagoryType()) {
 			tableComboViewer.setInput(null);
 			return;
@@ -132,17 +137,23 @@ class PatientCaseCatagoryComboViewer extends ACommonComboViewer {
 
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		//if (newInput != null) {
 		((TableComboViewer) viewer).getTableCombo().setText(StringUtils.EMPTY);
 		//((TableComboViewer) viewer).setInput(((TableComboViewer) viewer).getInput());
 		multiSelectionCatList.clear();
-		notifyDependViewers(dependViewers);
-		//}
+		notifyDependViewers(dependViewers, multiSelectionCatList);
+		
+		this.input = new TreeMap<String, Catagory>();
+		if (newInput != null) {
+			@SuppressWarnings({ "unchecked" })
+			Collection<Catagory> newCatList = (Collection<Catagory>) newInput;
+			for (Catagory cat : newCatList) {
+				this.input.put(cat.getName(), cat);
+			}
+		}
 	}
 
 	@Override
 	public Object[] getElements(Object inputElement) {
-		// TODO handle first element
 		if (inputElement instanceof Object[]) {
 			return (Object[]) inputElement;
 		}
@@ -174,7 +185,11 @@ class PatientCaseCatagoryComboViewer extends ACommonComboViewer {
 	}
 	
 	private boolean isSelected(Object element) {
-		return multiSelectionCatList.contains(element);
+		if (element == null) {
+			return false;
+		}
+		
+		return multiSelectionCatList.containsKey(((Catagory) element).getName());
 	}
 
 	@Override

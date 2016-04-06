@@ -51,7 +51,7 @@ import com.lehanh.pama.util.PamaHome;
 
 import static com.lehanh.pama.ui.util.UIControlUtils.*;
 
-public class PatientCaseView extends PamaFormUI implements IPatientViewPartListener {
+public class PatientCaseView extends PamaFormUI implements IPatientViewPartListener, IPatientView {
 	
 	public static final String ID = "com.lehanh.pama.patientCaseView";
 	private Text smallSurgeryText;
@@ -101,6 +101,7 @@ public class PatientCaseView extends PamaFormUI implements IPatientViewPartListe
 	public PatientCaseView() {
 		catManager = (ICatagoryManager) PamaHome.getService(ICatagoryManager.class);
 		paManager = (IPatientManager) PamaHome.getService(IPatientManager.class);
+		paManager.addPaListener(this);
 	}
 
 	@Override
@@ -419,8 +420,6 @@ public class PatientCaseView extends PamaFormUI implements IPatientViewPartListe
 						// disable all button at first
 						.setEnableAllButtons(false)
 						;
-		paManager.addPaListener(this);
-
 		grey = Display.getCurrent().getSystemColor(SWT.COLOR_GRAY);
 		
 		// initial versions
@@ -430,7 +429,7 @@ public class PatientCaseView extends PamaFormUI implements IPatientViewPartListe
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				PatientCaseEntity model = (PatientCaseEntity) ((IStructuredSelection) event.getSelection()).getFirstElement();
-				if (model == null) {
+				if (model == null || examCombo.getSelectedEntity() == model) {
 					return;
 				}
 				viewData(model);
@@ -478,15 +477,13 @@ public class PatientCaseView extends PamaFormUI implements IPatientViewPartListe
 		}
 		
 		this.examCombo.selectionChanged(model);
+		selectServiceCatagory(model);
+		
 		selectComboById(this.drCombo, model.getDrId());
-		this.serviceCatComboViewer.selectionChanged(model.getServiceList());
-		this.prognosticCatComboViewer.selectionChanged(model.getPrognosticCatagoryList());
 		setText(this.prognosticOtherText, model.getPrognosticOther());
-		this.diagnoseCatComboViewer.selectionChanged(model.getDiagnoseCatagoryList());
 		setText(this.diagnoseOtherText, model.getDiagnoseOther());
 		setText(this.noteFromPaText, model.getNoteFromClient());
 		setText(this.noteFromDrText, model.getNoteFromDr());
-		this.surgeryCatComboViewer.selectionChanged(model.getSurgeryCatagoryList());
 		setText(this.surgeryNoteText, model.getSurgeryNote());
 		this.surgeryDateCDate.setSelection(model.getSurgeryDate());
 		this.complicationCheckBtn.setSelection(model.isComplication());
@@ -496,7 +493,15 @@ public class PatientCaseView extends PamaFormUI implements IPatientViewPartListe
 		
 		this.viewData(model.getAppoSchedule());
 		
-		getFormManager().edit();
+		//getFormManager().edit();
+	}
+
+	private void selectServiceCatagory(PatientCaseEntity model) {
+		// Remain order of selection
+		this.serviceCatComboViewer.selectionChanged(model.getServiceNames());
+		this.prognosticCatComboViewer.selectionChanged(model.getPrognosticCatagoryNames());
+		this.diagnoseCatComboViewer.selectionChanged(model.getDiagnoseCatagoryNames());
+		this.surgeryCatComboViewer.selectionChanged(model.getSurgeryCatagoryNames());
 	}
 
 	private void viewData(AppointmentSchedule appoSchedule) {
@@ -504,7 +509,7 @@ public class PatientCaseView extends PamaFormUI implements IPatientViewPartListe
 			return; // sure that appointment controls cleared date before
 		}
 		this.nextAppCDate.setSelection(appoSchedule.getAppointmentDate());
-		selectComboById(this.appPurposrCombo, appoSchedule.getAppointmentCatagory().getId());
+		selectComboById(this.appPurposrCombo, appoSchedule.getAppointmentCatagory() == null ? null : appoSchedule.getAppointmentCatagory().getId());
 		setText(this.appNoteText, appoSchedule.getNote());
 	}
 	
@@ -590,6 +595,11 @@ public class PatientCaseView extends PamaFormUI implements IPatientViewPartListe
 	@Override
 	public void patientChanged(Patient oldPa, Patient newPa) {
 		viewData(newPa);
+	}
+
+	@Override
+	public boolean isEditing() {
+		return this.saveBtn.getEnabled();
 	}
 
 }

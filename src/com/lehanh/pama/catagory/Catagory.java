@@ -116,4 +116,15 @@ public class Catagory {
 		this.otherDataText = otherDataText;
 	}
 
+	public static List<String> getListName(List<? extends Catagory> cats) {
+		if (cats == null) {
+			return null;
+		}
+		List<String> result = new LinkedList<String>();
+		for (Catagory cat : cats) {
+			result.add(cat.getName());
+		}
+		return result;
+	}
+
 }

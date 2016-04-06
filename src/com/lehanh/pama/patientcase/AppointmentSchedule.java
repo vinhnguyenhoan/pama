@@ -7,6 +7,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.lehanh.pama.IJsonDataObject;
 import com.lehanh.pama.catagory.AppointmentCatagory;
+import com.lehanh.pama.util.ValidateUtils;
 
 public class AppointmentSchedule implements Serializable, IJsonDataObject {
 
@@ -48,12 +49,9 @@ public class AppointmentSchedule implements Serializable, IJsonDataObject {
 		this.resolved = resolved;
 	}
 	
-	public AppointmentSchedule(Date appointmentDate, AppointmentCatagory appointmentCatagory, String note) {
-		this.appointmentDate = appointmentDate;
-		this.appointmentCatagory = appointmentCatagory;
-		this.note = note;
+	public AppointmentSchedule() {
 	}
-	
+
 	public Long getId() {
 		return id;
 	}
@@ -71,7 +69,8 @@ public class AppointmentSchedule implements Serializable, IJsonDataObject {
 	public Date getAppointmentDate() {
 		return appointmentDate;
 	}
-	public void setAppointmentDate(Date appointmentDate) {
+	void setAppointmentDate(Date appointmentDate) {
+		ValidateUtils.validateIsAllEmpty("Phải chọn ngày hẹn", appointmentDate);
 		this.appointmentDate = appointmentDate;
 	}
 	

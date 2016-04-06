@@ -1,13 +1,12 @@
 package com.lehanh.pama.patientcase;
 
-import java.security.InvalidParameterException;
 import java.util.Calendar;
 import java.util.Date;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.lehanh.pama.util.DateUtils;
 import com.lehanh.pama.util.JsonMapper;
+
+import static com.lehanh.pama.util.ValidateUtils.*;
 
 public class Patient {
 
@@ -56,7 +55,7 @@ public class Patient {
 	}
 
 	public void setName(String name) {
-		validateCommon(name, "Phải nhập tên");
+		validateIsAllEmpty("Phải nhập tên", name);
 		this.name = name;
 	}
 
@@ -73,7 +72,7 @@ public class Patient {
 	}
 
 	public void setBirthDayText(String birthDayText) {
-		validateCommon(birthDayText, "Phải nhập ngày sinh");
+		validateIsAllEmpty("Phải nhập ngày sinh", birthDayText);
 		this.birthDayText = birthDayText;
 	}
 
@@ -82,7 +81,7 @@ public class Patient {
 	}
 
 	public void setBirthDay(Date birthDay) {
-		validateCommon(birthDay, "Phải nhập ngày sinh");
+		validateIsAllEmpty("Phải nhập ngày sinh", birthDay);
 		this.birthDay = birthDay;
 	}
 
@@ -100,6 +99,7 @@ public class Patient {
 
 	public void setCellPhone(String cellPhone) {
 		// TODO validateMobi(cellPhone);
+		validateIsAllEmpty("Phải nhập số điện thoại", cellPhone, this.phone);
 		this.cellPhone = cellPhone;
 	}
 
@@ -108,6 +108,7 @@ public class Patient {
 	}
 
 	public void setPhone(String phone) {
+		validateIsAllEmpty("Phải nhập số điện thoại", cellPhone, this.phone);
 		this.phone = phone;
 	}
 
@@ -181,19 +182,10 @@ public class Patient {
 	}
 
 	public void setBirthDay(Calendar date) {
-		validateCommon(date, "Phải nhập ngày sinh");
+		validateIsAllEmpty("Phải nhập ngày sinh", date);
 		setBirthDay(date.getTime());
 	}
 	
-	private static final void validateCommon(Object obj, String message) {
-		if (obj == null) {
-			throw new InvalidParameterException(message);
-		}
-		if (obj instanceof String && StringUtils.isBlank(((String) obj))) {
-			throw new InvalidParameterException(message);
-		}
-	}
-
 	public String getMedicalPersonalInfoText() {
 		if (medicalPersonalInfo == null) {
 			return null;

@@ -11,6 +11,8 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
@@ -20,6 +22,8 @@ import org.eclipse.ui.IWindowListener;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+
+import com.lehanh.pama.ui.patientcase.IPatientView;
 
 // TODO import com.jinnova.tradestation.ui.PerspectiveManager.PerspectiveUpdatedListener;
 
@@ -40,6 +44,8 @@ public class PerspectiveSwitcherToolbar extends ContributionItem /*TODO implemen
 	private static final Map<Shell, ToolBar> TOOLBARS = new HashMap<Shell, ToolBar>();
 	private final SelectionListener toolbarListener = new SwitchPerspectiveToolbarListener();
 	private ToolBar parent;
+
+	public static IPatientView paDeaView;
 
 	static {
 		PlatformUI.getWorkbench().addWindowListener(WINDOW_LISTENER);
@@ -99,22 +105,40 @@ public class PerspectiveSwitcherToolbar extends ContributionItem /*TODO implemen
 	 */
 	private static final class SwitchPerspectiveToolbarListener extends SelectionAdapter {
 		public void widgetSelected(SelectionEvent e) {
-			ToolItem item = (ToolItem) e.widget;
-			if (item.getSelection()) {
-				IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-				IWorkbenchPage page = null;
-				if (window != null) {
-					page = window.getActivePage();
-				}
-				if (page != null) {
-					IPerspectiveDescriptor descriptor = (IPerspectiveDescriptor) item.getData(KEY_PERSPECTIVE_DESCR);
-					page.setPerspective(descriptor);
-				}
-			}
-			item.setSelection(true);
+			selectToolbarItem(e);
 		}
 	}
 
+	private static void selectToolbarItem(SelectionEvent e) {
+		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		ToolItem item = (ToolItem) e.widget;
+		IPerspectiveDescriptor perspectiveOfItem = (IPerspectiveDescriptor) item.getData(KEY_PERSPECTIVE_DESCR);
+		
+		if (paDeaView != null && paDeaView.isEditing()) {
+			e.doit = false;
+			IPerspectiveDescriptor perspective = window.getActivePage().getPerspective();
+			PERSPECTIVE_LISTENER.updateToolbar(window.getShell(), perspective);
+			if (perspective == perspectiveOfItem) {
+				MessageBox dialog = new MessageBox(Display.getCurrent().getActiveShell(), SWT.ICON_ERROR | SWT.OK);
+				dialog.setText("Lổi nhập liệu");
+				dialog.setMessage("Phải hoàn chỉnh việc nhập liệu trước khi qua màn hình khác!");
+				dialog.open();
+			}
+			return;
+		}
+
+		if (item.getSelection()) {
+			IWorkbenchPage page = null;
+			if (window != null) {
+				page = window.getActivePage();
+			}
+			if (page != null) {
+				page.setPerspective(perspectiveOfItem);
+			}
+		}
+		item.setSelection(true);
+	}
+	
 	/**
 	 * Update toolbar on activation of a perspective.
 	 * <p>

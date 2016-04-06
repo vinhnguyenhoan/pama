@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.TreeMap;
+import java.util.Map;
 
 import org.eclipse.swt.widgets.Display;
 
@@ -66,7 +66,7 @@ public class PatientManager implements IPatientManager, IPatientSearcher, IAppoi
 		calToday.set(Calendar.SECOND, 0);
 		listAppointmentToday = new ScheduleDao().loadAllAppointment(calToday.getTime());
 		
-		TreeMap<Long, Catagory> allAppointmentType = catagoryManager.getCatagoryByType(CatagoryType.APPOINTMENT);
+		Map<Long, Catagory> allAppointmentType = catagoryManager.getCatagoryByType(CatagoryType.APPOINTMENT);
 		for (AppointmentSchedule aS : listAppointmentToday) {
 			if (aS.getAppointmentType() == null || aS.getAppointmentType() <= 0) {
 				continue;
@@ -177,7 +177,7 @@ public class PatientManager implements IPatientManager, IPatientSearcher, IAppoi
 		}
 		notifyPaListener(patientSelected, result, paListeners);
 		this.patientSelected = result; // update patientSelected before call cancelEditing
-		cancelEditingPatientCase();
+		getCurrentPatient().reloadMedicalInfo();
 	}
 	
 	private void notifyPaListener(final Patient oldPa, final Patient newPa, final List<IPatientViewPartListener> paListeners) {
@@ -239,7 +239,7 @@ public class PatientManager implements IPatientManager, IPatientSearcher, IAppoi
 		} catch (SQLException e) {
 			throw new PamaException("Lổi cập nhật DB: " + e.getMessage());
 		}
-		cancelEditingPatientCase();
+		getCurrentPatient().reloadMedicalInfo();
 		notifyPaListener(patientSelected, patientSelected, paListeners);
 	}
 

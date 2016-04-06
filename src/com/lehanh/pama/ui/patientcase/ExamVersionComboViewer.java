@@ -7,6 +7,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.nebula.jface.tablecomboviewer.TableComboViewer;
 import org.eclipse.nebula.widgets.tablecombo.TableCombo;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.wb.swt.SWTResourceManager;
@@ -39,6 +40,7 @@ class ExamVersionComboViewer extends ACommonComboViewer {
 		this.tableComboViewer.getTableCombo().setShowTableHeader(true);
 		this.tableComboViewer.getTableCombo().defineColumns(new String[] {StringUtils.EMPTY, "Ngày đến", "Thực hiện" });
 		this.tableComboViewer.getTableCombo().setClosePopupAfterSelection(true);
+		this.tableComboViewer.getTableCombo().getTextControl().addModifyListener(this);
 	}
 
 	/* (non-Javadoc)
@@ -150,4 +152,12 @@ class ExamVersionComboViewer extends ACommonComboViewer {
 		return null;
 	}
 
+	@Override
+	public void modifyText(ModifyEvent e) {
+		String text = tableComboViewer.getTableCombo().getText();
+		if (StringUtils.isBlank(text)) {
+			tableComboViewer.refresh();
+			selectedEntity = null;
+		}
+	}
 }

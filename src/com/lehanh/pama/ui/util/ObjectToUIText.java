@@ -1,8 +1,8 @@
 package com.lehanh.pama.ui.util;
 
-public interface ObjectToUIText {
+public interface ObjectToUIText<T, Id> {
 
-	String showUI(Object object);
+	String showUI(T object);
 	
-	Object getIdForUI(Object object);
+	Id getIdForUI(T object);
 }

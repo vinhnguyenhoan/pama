@@ -30,6 +30,9 @@ public class MedicalPersonalInfo implements Serializable, IJsonDataObject {
 	@SerializedName("mH")
 	private String medicalHistory;
 	
+	public MedicalPersonalInfo() {
+	}
+	
 	public IPatientCaseList getPatientCaseList() {
 		if (patientCaseList == null) {
 			patientCaseList = new PatientCaseList(getPatientCases());
@@ -44,6 +47,11 @@ public class MedicalPersonalInfo implements Serializable, IJsonDataObject {
 		return this.patientCases;
 	}
 
+	@SuppressWarnings("unused") // just for gson, this method unused
+	private void setPatientCases(List<PatientCaseEntity> pa) {
+		this.patientCases = pa;
+	}
+	
 	public PatientCaseSummary getPatientCaseSummary() {
 		if (patientCaseSummary == null) {
 			patientCaseSummary = new PatientCaseSummary();
@@ -76,7 +84,6 @@ public class MedicalPersonalInfo implements Serializable, IJsonDataObject {
 		this.medicalHistory = medicalHistory;
 	}
 
-}
 //public static void main(String[] args) {
 //	MedicalPersonalInfo mI = new MedicalPersonalInfo();
 //	List<PatientCaseEntity> patientCase = new LinkedList<PatientCaseEntity>();
@@ -107,3 +114,4 @@ public class MedicalPersonalInfo implements Serializable, IJsonDataObject {
 //	MedicalPersonalInfo mI2 = JsonMapper.fromJson(json, MedicalPersonalInfo.class);
 //	System.out.println(mI2);
 //}
+}

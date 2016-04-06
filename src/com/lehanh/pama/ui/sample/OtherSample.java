@@ -34,7 +34,6 @@ public class OtherSample {
 		Image itemImage = PamaResourceManager.getImage("C:\\Users\\vinhhnguyen\\Desktop\\mui_3 - Copy.jpg"/*, 120, 150*/); // 17176 - Copy
 		
 		Gallery gallery = new Gallery(shell, SWT.V_SCROLL | SWT.MULTI);
-
 		// Renderers
 		DefaultGalleryGroupRenderer gr = new DefaultGalleryGroupRenderer();
 		gr.setMinMargin(2);

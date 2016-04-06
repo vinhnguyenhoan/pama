@@ -33,7 +33,7 @@ import com.lehanh.pama.util.PamaHome;
 
 import static com.lehanh.pama.ui.util.UIControlUtils.*;
 
-public class PatientInfoView extends PamaFormUI implements IPatientViewPartListener {
+public class PatientInfoView extends PamaFormUI implements IPatientViewPartListener, IPatientView {
 	
 	public static final String ID = "com.lehanh.pama.patientInfoView";
 	
@@ -83,6 +83,7 @@ public class PatientInfoView extends PamaFormUI implements IPatientViewPartListe
 	public PatientInfoView() {
 		catManager = (ICatagoryManager) PamaHome.getService(ICatagoryManager.class);
 		paManager = (IPatientManager) PamaHome.getService(IPatientManager.class);
+		paManager.addPaListener(this);
 	}
 
 	@Override
@@ -296,8 +297,6 @@ public class PatientInfoView extends PamaFormUI implements IPatientViewPartListe
 						.setEditableAll(false)
 						.cancel(paManager.getCurrentPatient() != null);
 		
-		paManager.addPaListener(this);
-		
 		// init paLevelCombo
 		initialCombo(paLevelCombo, catManager.getCatagoryByType(CatagoryType.SPIRIT_LEVEL).values(), "Chưa xác định", 0,
 				new CatagoryToUIText());
@@ -416,6 +415,11 @@ public class PatientInfoView extends PamaFormUI implements IPatientViewPartListe
 	public void patientChanged(Patient oldPa, Patient newPa) {
 		// TODO Auto-generated method stub
 		handleData(newPa);
+	}
+
+	@Override
+	public boolean isEditing() {
+		return this.saveBtn.getEnabled();
 	}
 
 }
