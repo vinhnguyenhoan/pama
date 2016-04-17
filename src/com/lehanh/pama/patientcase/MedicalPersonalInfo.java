@@ -7,6 +7,7 @@ import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.lehanh.pama.IJsonDataObject;
+import com.lehanh.pama.util.JsonMapper;
 
 public class MedicalPersonalInfo implements Serializable, IJsonDataObject {
 	
@@ -21,51 +22,54 @@ public class MedicalPersonalInfo implements Serializable, IJsonDataObject {
 	private PatientCaseList patientCaseList;
 	
 	@Expose
-	@SerializedName("paS")
-	private PatientCaseSummary patientCaseSummary;
+	@SerializedName("summary")
+	//private PatientCaseSummary patientCaseSummary;
+	private String summary;
+	
 	@Expose
 	@SerializedName("ana")
 	private String anamnesis;
 	@Expose
 	@SerializedName("mH")
 	private String medicalHistory;
+
+	private Long patientId;
 	
 	public MedicalPersonalInfo() {
 	}
 	
+	public MedicalPersonalInfo(Long patientId) {
+		this.patientId = patientId;
+	}
+	
+	void setPatientId(Long pId) {
+		this.patientId = pId;
+	}
+	
 	public IPatientCaseList getPatientCaseList() {
 		if (patientCaseList == null) {
-			patientCaseList = new PatientCaseList(getPatientCases());
+			patientCaseList = new PatientCaseList(patientId, getPatientCases());
 		}
 		return this.patientCaseList;
 	}
 
-	private List<PatientCaseEntity> getPatientCases() {
+	public List<PatientCaseEntity> getPatientCases() {
 		if (this.patientCases == null) {
 			this.patientCases = new LinkedList<PatientCaseEntity>();
 		}
 		return this.patientCases;
 	}
 
-	@SuppressWarnings("unused") // just for gson, this method unused
-	private void setPatientCases(List<PatientCaseEntity> pa) {
+	public void setPatientCases(List<PatientCaseEntity> pa) {
 		this.patientCases = pa;
 	}
 	
-	public PatientCaseSummary getPatientCaseSummary() {
-		if (patientCaseSummary == null) {
-			patientCaseSummary = new PatientCaseSummary();
-		}
-		patientCaseSummary.updatePatientCase(this.getPatientCases());
-		return patientCaseSummary;
+	public  String getSummary() {
+		return this.summary;
 	}
-
-	private void setPatientCaseSummary(PatientCaseSummary patientCaseSummary) {
-		this.patientCaseSummary = patientCaseSummary;
-	}
-
-	public void setPatientCaseSummary(String text) {
-		setPatientCaseSummary(new PatientCaseSummary(text));
+	
+	public void setSummary(String text) {
+		this.summary = ((PatientCaseList) this.getPatientCaseList()).setSummary(text);
 	}
 	
 	public String getAnamnesis() {
@@ -84,34 +88,32 @@ public class MedicalPersonalInfo implements Serializable, IJsonDataObject {
 		this.medicalHistory = medicalHistory;
 	}
 
-//public static void main(String[] args) {
-//	MedicalPersonalInfo mI = new MedicalPersonalInfo();
-//	List<PatientCaseEntity> patientCase = new LinkedList<PatientCaseEntity>();
-//	
-//	PatientCaseEntity p1 = new PatientCaseEntity();
-//	List<PatientCaseEntity> p1List = new LinkedList<PatientCaseEntity>();
-//	PatientCaseEntity p11 = new PatientCaseEntity();
-//	p1List.add(p11);
-//	p1.setReExamInfo(p1List);
-//	
-//	PatientCaseEntity p2 = new PatientCaseEntity();
-//	
-//	patientCase.add(p1);
-//	patientCase.add(p2);
-//	mI.patientCases = patientCase;
-//	
-//	PatientCaseSummary patientCaseSummary = new PatientCaseSummary();
-//	mI.patientCaseSummary = patientCaseSummary;
-//	
-//	mI.anamnesis = null;
-//	
-//	String medicalHistory = "khong benh";
-//	mI.medicalHistory = medicalHistory;
-//	
-//	String json = JsonMapper.toJson(mI);
-//	System.out.println(json);
-//	
-//	MedicalPersonalInfo mI2 = JsonMapper.fromJson(json, MedicalPersonalInfo.class);
-//	System.out.println(mI2);
-//}
+	public static void main(String[] args) {
+		MedicalPersonalInfo mI = new MedicalPersonalInfo(1l);
+		List<PatientCaseEntity> patientCase = new LinkedList<PatientCaseEntity>();
+
+		PatientCaseEntity p1 = new PatientCaseEntity();
+		List<PatientCaseEntity> p1List = new LinkedList<PatientCaseEntity>();
+		PatientCaseEntity p11 = new PatientCaseEntity();
+		p1List.add(p11);
+		p1.setReExamInfo(p1List);
+
+		PatientCaseEntity p2 = new PatientCaseEntity();
+
+		patientCase.add(p1);
+		patientCase.add(p2);
+		mI.patientCases = patientCase;
+
+		mI.anamnesis = null;
+
+		String medicalHistory = "khong benh";
+		mI.medicalHistory = medicalHistory;
+
+		String json = JsonMapper.toJson(mI);
+		System.out.println(json);
+
+		MedicalPersonalInfo mI2 = JsonMapper.fromJson(json,
+				MedicalPersonalInfo.class);
+		System.out.println(mI2);
+	}
 }

@@ -2,7 +2,6 @@ package com.lehanh.pama.patientcase;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import com.lehanh.pama.catagory.AppointmentCatagory;
 import com.lehanh.pama.catagory.DiagnoseCatagory;
@@ -10,14 +9,14 @@ import com.lehanh.pama.catagory.DrCatagory;
 import com.lehanh.pama.catagory.PrognosticCatagory;
 import com.lehanh.pama.catagory.ServiceCatagory;
 import com.lehanh.pama.catagory.SurgeryCatagory;
-import com.lehanh.pama.ui.util.ObjectToUIText;
 
 public interface IPatientCaseList {
 
-	boolean isLastExam(PatientCaseEntity selectedEntity);
-
-	Object[] getAllVersions();
-
+	boolean isListRootCase();
+	
+	PatientCaseEntity createDetailCase(PatientCaseStatus status);
+	IPatientCaseList createRootCase();
+	
 	void updateCase(PatientCaseEntity paCaseEntity, DrCatagory drCat,
 			List<ServiceCatagory> serviceList,
 			List<PrognosticCatagory> progCatList, String prognosticOtherText,
@@ -28,12 +27,18 @@ public interface IPatientCaseList {
 			String smallSurgery, String drAdvice, Date nextApp,
 			AppointmentCatagory appPurpose, String appNote);
 
-	PatientCaseEntity getLastExamByStatus(PatientCaseStatus... caseStatus);
+	Object[] getAllVersions();
+	IPatientCaseList getSubList(int parentId);
+	
+	PatientCaseEntity getLastExamHaveStatus(PatientCaseStatus... caseStatus);
+	boolean isNotHaveAnyEntity();
 
-	boolean isEmptyVersions();
-
+	boolean isLastCreatedExam(PatientCaseEntity selectedEntity);
 	boolean isCreatingExam(PatientCaseEntity entity);
 
-	Map<String, Map<String, Map<String, Object>>> getAllImageGroup(ObjectToUIText<PatientCaseEntity, Integer> objToText);
+	String getSummary(boolean includeConsult);
+	String getSurgerySummary();
+
+	ISurgeryImageList getSurgeryImageList();
 
 }

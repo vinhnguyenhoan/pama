@@ -41,13 +41,20 @@ public class Patient {
 
 	public void setId(Long id) {
 		this.id = id;
+		if (this.medicalPersonalInfo != null) {
+			this.medicalPersonalInfo.setPatientId(id);
+		}
 	}
 	
 	public MedicalPersonalInfo getMedicalPersonalInfo() {
 		if (this.medicalPersonalInfo == null) {
-			this.medicalPersonalInfo = new MedicalPersonalInfo();
+			this.medicalPersonalInfo = new MedicalPersonalInfo(this.id);
 		}
 		return this.medicalPersonalInfo;
+	}
+	
+	void setMedicalPersonalInfo(MedicalPersonalInfo mI) {
+		this.medicalPersonalInfo = mI;
 	}
 
 	public String getName() {
@@ -196,5 +203,6 @@ public class Patient {
 	void reloadMedicalInfo() {
 		String json = JsonMapper.toJson(getMedicalPersonalInfo());
 		this.medicalPersonalInfo = JsonMapper.fromJson(json, MedicalPersonalInfo.class);
+		this.medicalPersonalInfo.setPatientId(id);
 	}
 }

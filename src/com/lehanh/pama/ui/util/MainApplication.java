@@ -1,5 +1,7 @@
 package com.lehanh.pama.ui.util;
 
+import org.eclipse.swt.graphics.Image;
+
 import com.lehanh.pama.PamaApplication;
 
 public class MainApplication implements PamaApplication {
@@ -44,6 +46,12 @@ public class MainApplication implements PamaApplication {
 	
 	@Override
 	public String getPassword() {
+		// do nothing
+		return null;
+	}
+
+	@Override
+	public Image loadImage(String string) {
 		// do nothing
 		return null;
 	}

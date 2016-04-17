@@ -70,6 +70,9 @@ public enum CatagoryType {
 	}
 	
 	public Catagory createCatalog(Long id, String name, String desc) {
-		return new Catagory(id, this, name, desc);
+		Catagory result = createCatalog(id);
+		result.setName(name);
+		result.setDesc(desc);
+		return result;
 	}
 }

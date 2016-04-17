@@ -18,9 +18,7 @@ public class ValidateUtils {
 					validateIsAllEmpty(message, ((Collection<?>) obj).toArray());
 					return false;
 				}
-			}
-			
-			if (obj != null) {
+			} else if (obj != null) {
 				return false;
 			}
 		}

@@ -14,7 +14,7 @@ public interface IFormManager {
 
 	IFormManager setEditableAll(boolean editable);
 
-	IFormManager setEditable(boolean editable, Control control);
+	IFormManager setEditable(boolean editable, Control... controls);
 	
 	IFormManager clearFormData();
 

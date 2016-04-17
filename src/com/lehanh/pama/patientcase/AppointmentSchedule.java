@@ -20,6 +20,7 @@ public class AppointmentSchedule implements Serializable, IJsonDataObject {
 	@SerializedName("appoId")
 	private Long id;
 	
+	@Expose
 	private Long patientId;
 	
 	@Expose
@@ -104,4 +105,5 @@ public class AppointmentSchedule implements Serializable, IJsonDataObject {
 	public void setNote(String note) {
 		this.note = note;
 	}
+
 }

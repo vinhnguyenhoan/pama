@@ -14,9 +14,18 @@ public class UIControlUtils {
 	private static final String DIRTY = "DIRTY";
 	private static final String START_INDEX = "START_INDEX";
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static final void initialCombo(CCombo combo, Iterable<?> listData, String firstText, int startIndex, ObjectToUIText objectToUIText) {
-		int comboItemIndex = 0;
+		// clear all data and item before set new values
+		combo.removeAll();
+		combo.setData(FIRST_TEXT, null);
+		for (int i = 0; i < combo.getItemCount(); i++) {
+			combo.setData(ID_KEY + i, null);
+			combo.setData(VALUE_KEY + i, null);
+		}
 		
+		// set new values and items
+		int comboItemIndex = 0;
 		if (firstText != null) {
 			combo.add(firstText);
 			combo.setData(FIRST_TEXT, firstText);

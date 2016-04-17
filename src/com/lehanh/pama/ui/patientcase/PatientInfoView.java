@@ -1,7 +1,15 @@
 package com.lehanh.pama.ui.patientcase;
 
+import static com.lehanh.pama.ui.util.UIControlUtils.getValueFromCombo;
+import static com.lehanh.pama.ui.util.UIControlUtils.initialCombo;
+import static com.lehanh.pama.ui.util.UIControlUtils.isChanged;
+import static com.lehanh.pama.ui.util.UIControlUtils.listenModifiedByClient;
+import static com.lehanh.pama.ui.util.UIControlUtils.selectComboById;
+import static com.lehanh.pama.ui.util.UIControlUtils.setText;
+
 import java.security.InvalidParameterException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.nebula.widgets.cdatetime.CDT;
 import org.eclipse.nebula.widgets.cdatetime.CDateTime;
 import org.eclipse.swt.SWT;
@@ -30,8 +38,6 @@ import com.lehanh.pama.ui.PamaFormUI;
 import com.lehanh.pama.ui.util.CatagoryToUIText;
 import com.lehanh.pama.util.DateUtils;
 import com.lehanh.pama.util.PamaHome;
-
-import static com.lehanh.pama.ui.util.UIControlUtils.*;
 
 public class PatientInfoView extends PamaFormUI implements IPatientViewPartListener, IPatientView {
 	
@@ -83,7 +89,7 @@ public class PatientInfoView extends PamaFormUI implements IPatientViewPartListe
 	public PatientInfoView() {
 		catManager = (ICatagoryManager) PamaHome.getService(ICatagoryManager.class);
 		paManager = (IPatientManager) PamaHome.getService(IPatientManager.class);
-		paManager.addPaListener(this);
+		paManager.addPaListener(this, ID);
 	}
 
 	@Override
@@ -309,6 +315,7 @@ public class PatientInfoView extends PamaFormUI implements IPatientViewPartListe
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (birthDayCalendar.getSelection() == null) {
+					ageLbl.setText(StringUtils.EMPTY);
 					return;
 				}
 				ageLbl.setText(DateUtils.calculateAge(birthDayCalendar.getSelection()) + " " + AGE);
@@ -349,7 +356,7 @@ public class PatientInfoView extends PamaFormUI implements IPatientViewPartListe
 		MedicalPersonalInfo medicalPersonalInfo = patient.getMedicalPersonalInfo();
 		setText(anamnesisText, medicalPersonalInfo.getAnamnesis());
 		setText(medicalHistoryText, medicalPersonalInfo.getMedicalHistory());
-		setText(detailExamText, medicalPersonalInfo.getPatientCaseSummary().getSummary(true));
+		setText(detailExamText, medicalPersonalInfo.getPatientCaseList().getSummary(true));
 		
 		// TODO paImageLabel;
 	}
@@ -377,7 +384,7 @@ public class PatientInfoView extends PamaFormUI implements IPatientViewPartListe
 			id, imagePath, name, address, birthDay, isFermale,
 			cellPhone, phone, email, career, patientLevel, note, medicalHistory, anamnesis
 			 */
-			paManager.updatePatient(
+			paManager.updatePatient(ID,
 					null, // TODO ImageName
 					// personal info
 					nameText.getText(), addText.getText(), birthDayCalendar.getSelection(),
@@ -401,7 +408,7 @@ public class PatientInfoView extends PamaFormUI implements IPatientViewPartListe
 	}
 
 	private void addNew() {
-		// do nothing for data
+		paManager.selectPatient(ID, null);
 		getFormManager().addNew();
 	}
 
@@ -412,8 +419,10 @@ public class PatientInfoView extends PamaFormUI implements IPatientViewPartListe
 	}
 
 	@Override
-	public void patientChanged(Patient oldPa, Patient newPa) {
-		// TODO Auto-generated method stub
+	public void patientChanged(Patient oldPa, Patient newPa, String[] callIds) {
+		/*if (callIds != null && Arrays.binarySearch(callIds, ID) > -1) {
+			return;
+		}*/
 		handleData(newPa);
 	}
 

@@ -5,7 +5,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -77,12 +80,48 @@ public class CatagoryManager implements ICatagoryManager {
 	}
 
 	@Override
+	public Catagory getCatagoryByTypeAndName(CatagoryType catType, String name) {
+		if (StringUtils.isBlank(name) || catType == null) {
+			return null;
+		}
+		TreeMap<Long, Catagory> catByType = this.allCatagory.get(catType);
+		if (catByType == null) {
+			return null;
+		}
+		
+		for (Entry<Long, Catagory> entry : catByType.entrySet()) {
+			if (name.equals(entry.getValue().getName())) {
+				return entry.getValue();
+			}
+		}
+		
+		return null;
+	}
+	
+	@Override
 	public TreeMap<Long, Catagory> getCatagoryByType(CatagoryType catType) {
 		TreeMap<Long, Catagory> catByType = this.allCatagory.get(catType);
 		if (catByType == null) {
 			return new TreeMap<Long, Catagory>();
 		}
 		return new TreeMap<Long, Catagory>(catByType);
+	}
+	
+	@Override
+	public List<Catagory> getCatagoryByTypeAndName(CatagoryType type, List<String> allNames) {
+		List<Catagory> result = new LinkedList<Catagory>();
+		if (allNames == null) {
+			return result;
+		}
+		
+		for (String name : allNames) {
+			Catagory cat = getCatagoryByTypeAndName(type, name);
+			if (cat == null) {
+				continue;
+			}
+			result.add(cat);
+		}
+		return result;
 	}
 
 	@Override
@@ -146,4 +185,5 @@ public class CatagoryManager implements ICatagoryManager {
 	    json = null;
 	    System.out.println(gson.fromJson(json, HashMap.class));
 	}
+
 }

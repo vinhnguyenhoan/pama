@@ -24,6 +24,9 @@ public class PamaHome {
 	public static final String DB_PASS_PRO_NAME = "lh_pama_pass";
 	public static final String DB_IP_PRO_NAME = "lh_pama_db_ip";
 	
+	public static final String SURGERY_IMAGE_PATH = "lh_pama_surgery_image_path_server";
+	public static final String DEFAULT_SURGERY_IMAGE_PATH = "D:\\Pama\\SharedImage\\Server\\PhauThuat";
+	
 	public static String getDbName(String defaultDB) {
 		return application.getProperty(DB_NAME_PRO_NAME, defaultDB);
 	}
@@ -42,6 +45,7 @@ public class PamaHome {
 	
 	private static final Map<Class<?>, IService> serviceManager = new HashMap<Class<?>, IService>();
 	private static final List<IService> serviceManagerOrderedList = new LinkedList<IService>();
+
 	static {
 		putService(ICatagoryManager.class, new CatagoryManager());
 		putService(IPatientManager.class, new PatientManager());
@@ -63,10 +67,8 @@ public class PamaHome {
 				service.initialize();
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

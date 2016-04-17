@@ -4,9 +4,10 @@ import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.LinkedList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.swt.widgets.Display;
 
@@ -32,17 +33,18 @@ public class PatientManager implements IPatientManager, IPatientSearcher, IAppoi
 
 	private Patient patientSelected;
 	
-	private List<IPatientViewPartListener> paListeners = new LinkedList<IPatientViewPartListener>();
+	private Map<String, IPatientViewPartListener> paListeners = new HashMap<String, IPatientViewPartListener>();
 
 	private class NotifyPaRunnable implements Runnable {
 		
 		private Patient oldPa;
 		private Patient newPa;
+		private String[] callIds;
 		
 		@Override
 		public void run() {
-			for (IPatientViewPartListener pL : paListeners) {
-				pL.patientChanged(oldPa, newPa);
+			for (Entry<String, IPatientViewPartListener> pL : paListeners.entrySet()) {
+				pL.getValue().patientChanged(oldPa, newPa, callIds);
 			}
 		}
 	}
@@ -140,31 +142,29 @@ public class PatientManager implements IPatientManager, IPatientSearcher, IAppoi
 	 * @see com.lehanh.pama.patientcase.IPatientManager#updatePatient(java.lang.String, java.lang.String, java.lang.String, java.util.Date, boolean, java.lang.String, java.lang.String, java.lang.String, java.lang.String, int, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
-	public void updatePatient(String imagePath, String name, String address, Date birthDay, boolean isFermale,
+	public void updatePatient(String uiId, String imagePath, String name, String address, Date birthDay, boolean isFermale,
 			String cellPhone, String phone, String email, String career, int patientLevel, String note,  String detailExam,
 			String medicalHistory, String anamnesis) {
+		// validate input data
+		Patient validateSample = new Patient();
+		updatePatient(name, address, birthDay, isFermale, cellPhone, phone,
+				email, career, patientLevel, note, validateSample);
+		
 		Patient result = new Patient();
 		if (patientSelected != null) {
 			result.setId(patientSelected.getId());
 		}
-		result.setName(name);
-		result.setAddress(address);
-		result.setBirthDay(birthDay);
-		result.setFermale(isFermale);
-		result.setCellPhone(cellPhone);
-		result.setPhone(phone);
-		result.setEmail(email);
-		result.setCareer(career);
-		result.setPatientLevel(patientLevel);
-		result.setNote(note);
+		updatePatient(name, address, birthDay, isFermale, cellPhone, phone,
+				email, career, patientLevel, note, result);
 		
-		MedicalPersonalInfo medicalPersonalInfo = null;
+		MedicalPersonalInfo medicalPersonalInfo = result.getMedicalPersonalInfo();
 		if (patientSelected != null) {
 			medicalPersonalInfo = patientSelected.getMedicalPersonalInfo();
-			medicalPersonalInfo.setAnamnesis(anamnesis);
-			medicalPersonalInfo.setMedicalHistory(medicalHistory);
-			medicalPersonalInfo.setPatientCaseSummary(detailExam);
+			result.setMedicalPersonalInfo(medicalPersonalInfo);
 		}
+		medicalPersonalInfo.setAnamnesis(anamnesis);
+		medicalPersonalInfo.setMedicalHistory(medicalHistory);
+		medicalPersonalInfo.setSummary(detailExam);
 		
 		try {
 			if (result.getId() == null) {
@@ -175,14 +175,41 @@ public class PatientManager implements IPatientManager, IPatientSearcher, IAppoi
 		} catch (SQLException e) {
 			throw new PamaException("Lổi cập nhật DB: " + e.getMessage());
 		}
-		notifyPaListener(patientSelected, result, paListeners);
+		notifyPaListener(patientSelected, result, paListeners, uiId);
 		this.patientSelected = result; // update patientSelected before call cancelEditing
 		getCurrentPatient().reloadMedicalInfo();
 	}
+
+	private static void updatePatient(String name, String address, Date birthDay,
+			boolean isFermale, String cellPhone, String phone, String email,
+			String career, int patientLevel, String note, Patient result) {
+		result.setName(name);
+		result.setAddress(address);
+		result.setBirthDay(birthDay);
+		result.setFermale(isFermale);
+		result.setCellPhone(cellPhone);
+		result.setPhone(phone);
+		result.setEmail(email);
+		result.setCareer(career);
+		result.setPatientLevel(patientLevel);
+		result.setNote(note);
+	}
 	
-	private void notifyPaListener(final Patient oldPa, final Patient newPa, final List<IPatientViewPartListener> paListeners) {
+	@Override
+	public void updatePatient(String uid) {
+		try {
+			new PatientDao().update(this.patientSelected);
+		} catch (SQLException e) {
+			throw new PamaException("Lổi cập nhật DB: " + e.getMessage());
+		}
+		notifyPaListener(null, this.patientSelected, paListeners, uid);
+		getCurrentPatient().reloadMedicalInfo();
+	}
+	
+	private void notifyPaListener(final Patient oldPa, final Patient newPa, final Map<String, IPatientViewPartListener> paListeners, String... callIds) {
 		notifyPaRunnable.oldPa = oldPa;
 		notifyPaRunnable.newPa = newPa;
+		notifyPaRunnable.callIds = callIds;
 		Display.getCurrent().asyncExec(notifyPaRunnable);
 	}
 
@@ -190,8 +217,8 @@ public class PatientManager implements IPatientManager, IPatientSearcher, IAppoi
 	 * @see com.lehanh.pama.patientcase.IPatientManager#addPaListener(com.lehanh.pama.patientcase.IPatientViewPartListener)
 	 */
 	@Override
-	public synchronized void addPaListener(IPatientViewPartListener paL) {
-		this.paListeners.add(paL);
+	public synchronized void addPaListener(IPatientViewPartListener paL, String id) {
+		this.paListeners.put(id, paL);
 	}
 	
 	/* (non-Javadoc)
@@ -206,7 +233,7 @@ public class PatientManager implements IPatientManager, IPatientSearcher, IAppoi
 	 * @see com.lehanh.pama.patientcase.IPatientManager#updatePatientCase(com.lehanh.pama.patientcase.PatientCaseEntity, com.lehanh.pama.catagory.DrCatagory, java.util.List, java.util.List, java.lang.String, java.util.List, java.lang.String, java.lang.String, java.lang.String, java.util.List, java.lang.String, java.util.Date, boolean, boolean, java.lang.String, java.lang.String, java.util.Date, com.lehanh.pama.catagory.AppointmentCatagory, java.lang.String)
 	 */
 	@Override
-	public void updatePatientCase(PatientCaseEntity paCaseEntity,
+	public void updatePatientCase(String uiId, Integer rootCaseId, PatientCaseEntity paCaseEntity,
 			DrCatagory drCat, List<ServiceCatagory> serviceList,
 			List<PrognosticCatagory> progCatList, String prognosticOtherText,
 			List<DiagnoseCatagory> diagCatList, String diagOtherText,
@@ -219,41 +246,44 @@ public class PatientManager implements IPatientManager, IPatientSearcher, IAppoi
 		if (patientSelected == null) {
 			throw new IllegalAccessError("Chưa chọn bệnh nhân");
 		}
-
-		MedicalPersonalInfo medicalPersonalInfo = patientSelected.getMedicalPersonalInfo();
-		medicalPersonalInfo.getPatientCaseList()
-								.updateCase(paCaseEntity, drCat, serviceList, progCatList, prognosticOtherText,
-										diagCatList, diagOtherText, noteFromPa, noteFromDr, surList, surgeryNote,
-										surgeryDate, complication, beauty, smallSurgery, drAdvice, nextApp,
-										appPurpose, appNote);
+		if (rootCaseId == null) {
+			throw new IllegalAccessError("Chưa chọn bệnh án");
+		}
+		IPatientCaseList rootCasesList = patientSelected.getMedicalPersonalInfo().getPatientCaseList();
+		rootCasesList.getSubList(rootCaseId)
+				     .updateCase(paCaseEntity, drCat, serviceList, progCatList, prognosticOtherText,
+								diagCatList, diagOtherText, noteFromPa, noteFromDr, surList, surgeryNote,
+								surgeryDate, complication, beauty, smallSurgery, drAdvice, nextApp,
+								appPurpose, appNote);
 		try {
 			new PatientDao().update(patientSelected);
 		
 			AppointmentSchedule appSche = paCaseEntity.getAppoSchedule();
-			if (appSche.getId() == null) {
-				appSche.setPatientId(patientSelected.getId());
-				new ScheduleDao().insert(appSche);
-			} else {
-				new ScheduleDao().update(appSche);
+			if (appSche != null) {
+				if (appSche.getId() == null) {
+					appSche.setPatientId(patientSelected.getId());
+					new ScheduleDao().insert(appSche);
+				} else {
+					new ScheduleDao().update(appSche);
+				}
 			}
 		} catch (SQLException e) {
 			throw new PamaException("Lổi cập nhật DB: " + e.getMessage());
 		}
 		getCurrentPatient().reloadMedicalInfo();
-		notifyPaListener(patientSelected, patientSelected, paListeners);
-	}
-
-	/* (non-Javadoc)
-	 * @see com.lehanh.pama.patientcase.IPatientManager#createEmptyCase(com.lehanh.pama.patientcase.PatientCaseStatus)
-	 */
-	@Override
-	public void createEmptyCase(PatientCaseStatus status) {
-		 ((PatientCaseList) getCurrentPatient().getMedicalPersonalInfo().getPatientCaseList()).createEmptyCase(status);
+		notifyPaListener(patientSelected, patientSelected, paListeners, uiId);
 	}
 
 	@Override
 	public void cancelEditingPatientCase() {
 		getCurrentPatient().reloadMedicalInfo();
+	}
+
+	@Override
+	public void selectPatient(String uiId, Patient newPatient) {
+		Patient oldPa = this.patientSelected;
+		this.patientSelected = newPatient;
+		notifyPaListener(oldPa, patientSelected, paListeners, uiId);
 	}
 
 }

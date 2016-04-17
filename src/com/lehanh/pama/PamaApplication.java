@@ -1,5 +1,7 @@
 package com.lehanh.pama;
 
+import org.eclipse.swt.graphics.Image;
+
 public interface PamaApplication {
 	
 	String getUserId();
@@ -17,5 +19,7 @@ public interface PamaApplication {
 	void logError(String string);
 
 	void logError(String string, Throwable e);
+
+	Image loadImage(String string);
 
 }

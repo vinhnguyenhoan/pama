@@ -38,7 +38,7 @@ public class ApplicationWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
     @Override
     public void postWindowCreate() {
     	IStatusLineManager statusLine = this.actionBar.getStatusLine();
-    	((Composite) ((StatusLineManager) statusLine).getControl()).setLayout(new StatusLineLayout());
+    	//((Composite) ((StatusLineManager) statusLine).getControl()).setLayout(new StatusLineLayout());
 
     	
     	Shell shell = getWindowConfigurer().getWindow().getShell();

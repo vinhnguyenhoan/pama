@@ -19,39 +19,92 @@ import com.lehanh.pama.ui.util.ACommonComboViewer;
 class ExamVersionComboViewer extends ACommonComboViewer {
 
 	private final TableComboViewer tableComboViewer;
+	private PatientCaseEntity selectedEntity;
+	private IPatientCaseList patientCaseList;
+	
+	private ExamVersionComboViewer detailViewer;
+//	private final TableComboViewer detailCaseTableComboViewer;
+//	private PatientCaseEntity detailSelectedEntity;
+//	private IPatientCaseList detailPatientCaseList;
 	
 	private final Color backgroundSelected;
 
-	private PatientCaseEntity selectedEntity;
-
-	private IPatientCaseList patientCaseList;
+	private final boolean isRoot;
 	
-	ExamVersionComboViewer(TableComboViewer examVersionTComboViewer, Color backgroundSelected) {
+	interface ISelectionDetailChangedListener {
+		
+		void viewData(PatientCaseEntity model);
+	}
+	
+	private ISelectionDetailChangedListener selectionDetailListener;
+	
+	ExamVersionComboViewer(TableComboViewer rootCasetableComboViewer, TableComboViewer examVersionTComboViewer, 
+			Color backgroundSelected) {
+		this(rootCasetableComboViewer, backgroundSelected, true);
+		this.detailViewer = new ExamVersionComboViewer(examVersionTComboViewer, backgroundSelected, false);
+	}
+	
+	private ExamVersionComboViewer(TableComboViewer examVersionTComboViewer, Color backgroundSelected, boolean isRoot) {
 		this.tableComboViewer = examVersionTComboViewer;
 		this.backgroundSelected = backgroundSelected;
-		
-		this.tableComboViewer.setContentProvider(this);
-		// set the label providers
-		this.tableComboViewer.setLabelProvider(this);
-		// add listener
-		this.tableComboViewer.addSelectionChangedListener(this);
-		this.tableComboViewer.getTableCombo().getTextControl().addModifyListener(this);
-		
-		this.tableComboViewer.getTableCombo().setShowTableHeader(true);
-		this.tableComboViewer.getTableCombo().defineColumns(new String[] {StringUtils.EMPTY, "Ngày đến", "Thực hiện" });
-		this.tableComboViewer.getTableCombo().setClosePopupAfterSelection(true);
-		this.tableComboViewer.getTableCombo().getTextControl().addModifyListener(this);
+		this.isRoot = isRoot;
+		initialTableCombo(this.tableComboViewer, true);
 	}
 
+	private void initialTableCombo(TableComboViewer tableComboViewer, boolean isRoot) {
+		tableComboViewer.setContentProvider(this);
+		// set the label providers
+		tableComboViewer.setLabelProvider(this);
+		// add listener
+		tableComboViewer.addSelectionChangedListener(this);
+		tableComboViewer.getTableCombo().getTextControl().addModifyListener(this);
+		
+		tableComboViewer.getTableCombo().setShowTableHeader(true);
+		if (isRoot) {
+			tableComboViewer.getTableCombo().defineColumns(new String[] {"Thứ tự", "Ngày đến", "Phẩu thuật" });
+		} else {
+			tableComboViewer.getTableCombo().defineColumns(new String[] {"Thứ tự", "Ngày đến", "Thực hiện" });
+		}
+		tableComboViewer.getTableCombo().setClosePopupAfterSelection(true);
+		tableComboViewer.getTableCombo().getTextControl().addModifyListener(this);
+	}
+
+	void addSelectionDetailChangedListener(ISelectionDetailChangedListener selectionDetailListener) {
+		this.detailViewer.selectionDetailListener = selectionDetailListener;
+	}
+	
+	TableCombo[] getTableCombos() {
+		return new TableCombo[]{this.tableComboViewer.getTableCombo(), this.detailViewer.tableComboViewer.getTableCombo()};
+	}
+
+	IPatientCaseList getInput() {
+		return this.patientCaseList;
+	}
+	
+	IPatientCaseList getDetailInput() {
+		if (this.selectedEntity == null) {
+			return null;
+		}
+		return this.patientCaseList.getSubList(this.selectedEntity.getId());
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.lang.Object, int)
 	 */
 	public String getColumnText(Object element, int columnIndex) {
 		PatientCaseEntity model = (PatientCaseEntity) element;
-		switch (columnIndex) {
-			case 0: return StringUtils.EMPTY;
-			case 1: return model.getDateAsText();
-			case 2: return model.getStatusEnum().desc;
+		if (!isRoot) {
+			switch (columnIndex) {
+				case 0: return String.valueOf(model.getId());
+				case 1: return model.getDateAsText();
+				case 2: return model.getStatusEnum().desc;
+			}
+		} else {
+			switch (columnIndex) {
+				case 0: return String.valueOf(model.getId());
+				case 1: return model.getDateAsText();
+				case 2: return patientCaseList.getSubList(model.getId()).getSurgerySummary();
+			}
 		}
 		return "";
 	}
@@ -65,31 +118,44 @@ class ExamVersionComboViewer extends ACommonComboViewer {
 		if (model == null) {
 			return;
 		}
+		
 		selectionChanged(model);
 	}
-	
-	void selectionChanged(PatientCaseEntity model) {
-		if (model == null) {
-			return;
-		}
+
+	private void selectionChanged(PatientCaseEntity model) {
 		this.selectedEntity = model;
-
 		String selectionText = getSelectionText(selectedEntity);
-
 		this.tableComboViewer.getTableCombo().setText(selectionText);
-		this.tableComboViewer.update(model, null);
+
+		if (selectedEntity != null) {
+			this.tableComboViewer.refresh();
+			// notify detail viewer
+			if (detailViewer != null) {
+				this.detailViewer.setInput(patientCaseList.getSubList(selectedEntity.getId()));
+			}
+		}
+		if (selectionDetailListener != null) {
+			selectionDetailListener.viewData(selectedEntity);
+		}
 	}
 	
 	private String getSelectionText(PatientCaseEntity selectedEntity) {
+		if (selectedEntity == null) {
+			return StringUtils.EMPTY;
+		}
+		
 		String lastExamText = StringUtils.EMPTY;
-		if (this.patientCaseList.isLastExam(selectedEntity)) {
+		if (this.patientCaseList.isLastCreatedExam(selectedEntity)) {
 			lastExamText = " (lần gần nhất)";
 		} else if (this.patientCaseList.isCreatingExam(selectedEntity)) {
 			lastExamText = " (đang thực hiện)";
 		}
-		String selectionText = selectedEntity.getDateAsText() 
-									+ " - " + selectedEntity.getStatusEnum().desc + lastExamText;
-		return selectionText;
+		
+		if (isRoot) {
+			return selectedEntity.getDateAsText() + " - " + patientCaseList.getSubList(selectedEntity.getId()).getSurgerySummary() + lastExamText;
+		} else {
+			return selectedEntity.getDateAsText() + " - " + selectedEntity.getStatusEnum().desc + lastExamText;
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -97,14 +163,22 @@ class ExamVersionComboViewer extends ACommonComboViewer {
 	 */
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		TableCombo tableCombo = ((TableComboViewer) viewer).getTableCombo();
 		if (newInput instanceof IPatientCaseList) {
         	this.patientCaseList = (IPatientCaseList) newInput;
-        	this.selectedEntity = null;
-        	tableCombo.setText(StringUtils.EMPTY);
+        	
+    		// Default select last one and notify sub list combo
+    		PatientCaseEntity lastRoot = patientCaseList.getLastExamHaveStatus();
+    		this.selectionChanged(lastRoot);
         }
 	}
 
+	/*
+	 * set input for root case, used from client of this class
+	 */
+	void setInput(IPatientCaseList patientCaseList) {
+		this.tableComboViewer.setInput(patientCaseList);
+	}
+	
 	/* (non-Javadoc)
 	 * @see com.lehanh.pama.ui.util.ACommonComboViewer#getElements(java.lang.Object)
 	 */
@@ -133,8 +207,15 @@ class ExamVersionComboViewer extends ACommonComboViewer {
 		return selectedEntity != null && selectedEntity == element;
 	}
 
-	PatientCaseEntity getSelectedEntity() {
-		return selectedEntity;
+	Integer getSelectedRootId() {
+		if (selectedEntity == null) {
+			return null;
+		}
+		return selectedEntity.getId();
+	}
+	
+	PatientCaseEntity getSelectedDetailEntity() {
+		return this.detailViewer.selectedEntity;
 	}
 	
 	/* (non-Javadoc)
@@ -160,4 +241,5 @@ class ExamVersionComboViewer extends ACommonComboViewer {
 			selectedEntity = null;
 		}
 	}
+
 }

@@ -14,6 +14,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.nebula.jface.tablecomboviewer.TableComboViewer;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.widgets.Text;
 
 import com.lehanh.pama.ICatagoryManager;
 import com.lehanh.pama.catagory.Catagory;
@@ -31,20 +32,37 @@ class PatientCaseCatagoryComboViewer extends ACommonComboViewer {
 	
 	private List<PatientCaseCatagoryComboViewer> dependViewers;
 	private Color backgroundSelected;
+	private Text otherText;
 	
-	public PatientCaseCatagoryComboViewer(ICatagoryManager catManager, Color backgroundSelected, final TableComboViewer tableComboViewer, CatagoryType type, 
+	PatientCaseCatagoryComboViewer(ICatagoryManager catManager, Color backgroundSelected, final TableComboViewer tableComboViewer, CatagoryType type, 
 			PatientCaseCatagoryComboViewer... dependViewers) {
 		this(catManager, false, backgroundSelected, tableComboViewer, type, dependViewers);
 	}
 	
-	public PatientCaseCatagoryComboViewer(ICatagoryManager catManager, boolean showDataAtFirst, Color backgroundSelected, final TableComboViewer tableComboViewer, CatagoryType type, 
+	PatientCaseCatagoryComboViewer(ICatagoryManager catManager, boolean showDataAtFirst, Color backgroundSelected, final TableComboViewer tableComboViewer, CatagoryType type, 
 			PatientCaseCatagoryComboViewer... dependViewers) {
+		this(catManager, showDataAtFirst, backgroundSelected, tableComboViewer, type, 
+				null, dependViewers);
+	}
+
+	PatientCaseCatagoryComboViewer(ICatagoryManager catManager, Color backgroundSelected, final TableComboViewer tableComboViewer, CatagoryType type, 
+			Text otherText, PatientCaseCatagoryComboViewer... dependViewers) {
+		this(catManager, false, backgroundSelected, tableComboViewer, type, otherText, dependViewers);
+	}
+	
+	private PatientCaseCatagoryComboViewer(ICatagoryManager catManager, boolean showDataAtFirst, Color backgroundSelected, final TableComboViewer tableComboViewer, CatagoryType type, 
+			Text otherText, PatientCaseCatagoryComboViewer... dependViewers) {
 		this.catManager = catManager;
 		this.backgroundSelected = backgroundSelected;
 		this.tableComboViewer = tableComboViewer;
 		this.type = type;
 		this.dependViewers = Arrays.asList(dependViewers);
-
+		this.otherText = otherText;
+		
+		if (otherText != null) {
+			otherText.addModifyListener(this);
+		}
+		
 		this.tableComboViewer.setContentProvider(this);
 		// set the label providers
 		this.tableComboViewer.setLabelProvider(this);
@@ -81,21 +99,19 @@ class PatientCaseCatagoryComboViewer extends ACommonComboViewer {
 			} else {
 				multiSelectionCatList.put(catName, cat);
 			}
-	
 			tableComboViewer.update(cat, null);
 		}
 		String selectionText = getSelectionText(multiSelectionCatList);
-		
 		tableComboViewer.getTableCombo().setText(selectionText);
 		
-		notifyDependViewers(dependViewers, multiSelectionCatList);
+		notifyDependViewers(dependViewers, multiSelectionCatList, isContainOtherText());
 	}
 	
 	List<? extends Catagory> getMultiSelectionCatList() {
 		return new LinkedList<Catagory>(this.multiSelectionCatList.values());
 	}
 	
-	private String getSelectionText(TreeMap<String, Catagory> multiSelectionCatList) {
+	private static String getSelectionText(TreeMap<String, Catagory> multiSelectionCatList) {
 		if (multiSelectionCatList == null) {
 			return StringUtils.EMPTY;
 		}
@@ -110,29 +126,33 @@ class PatientCaseCatagoryComboViewer extends ACommonComboViewer {
 		return selectionText;
 	}
 	
-	private void notifyDependViewers(List<PatientCaseCatagoryComboViewer> dependViewers, TreeMap<String, Catagory> multiSelectionCatList) {
+	private void notifyDependViewers(List<PatientCaseCatagoryComboViewer> dependViewers, TreeMap<String, Catagory> multiSelectionCatList, boolean containOtherText) {
 		if (dependViewers == null) {
 			return;
 		}
 		for (PatientCaseCatagoryComboViewer dependViewer : dependViewers) {
-			dependViewer.changedByParent(type, multiSelectionCatList == null ? null : multiSelectionCatList.values());
+			dependViewer.changedByParent(this.type, multiSelectionCatList == null ? null : multiSelectionCatList.values(), containOtherText);
 		}
 	}
 
-	private void changedByParent(CatagoryType typeChanged, Collection<Catagory> multiSelectionCatList) {
-		if (multiSelectionCatList == null || multiSelectionCatList.isEmpty() || typeChanged != this.type.getParentCatagoryType()) {
+	private void changedByParent(CatagoryType typeChanged, Collection<Catagory> multiSelectionCatList, boolean containOtherText) {
+		if (!containOtherText && (multiSelectionCatList == null || multiSelectionCatList.isEmpty())) {
 			tableComboViewer.setInput(null);
 			return;
 		}
 		
-		TreeMap<Long, Catagory> result = new TreeMap<Long, Catagory>();
-		for (Catagory catSelected : multiSelectionCatList) {
-			List<Catagory> filterdCats = catManager.getSubCatagorysByParent(catSelected.getId(), this.type);
-			for (Catagory filterdCat : filterdCats) {
-				result.put(filterdCat.getId(), filterdCat);
+		if (containOtherText) {
+			tableComboViewer.setInput(catManager.getCatagoryByType(this.type).values());
+		} else if (multiSelectionCatList != null && !multiSelectionCatList.isEmpty()) {
+			TreeMap<Long, Catagory> result = new TreeMap<Long, Catagory>();
+			for (Catagory catSelected : multiSelectionCatList) {
+				List<Catagory> filterdCats = catManager.getSubCatagorysByParent(catSelected.getId(), this.type);
+				for (Catagory filterdCat : filterdCats) {
+					result.put(filterdCat.getId(), filterdCat);
+				}
 			}
+			tableComboViewer.setInput(result.values());
 		}
-		tableComboViewer.setInput(result.values());
 	}
 
 	@Override
@@ -140,7 +160,6 @@ class PatientCaseCatagoryComboViewer extends ACommonComboViewer {
 		((TableComboViewer) viewer).getTableCombo().setText(StringUtils.EMPTY);
 		//((TableComboViewer) viewer).setInput(((TableComboViewer) viewer).getInput());
 		multiSelectionCatList.clear();
-		notifyDependViewers(dependViewers, multiSelectionCatList);
 		
 		this.input = new TreeMap<String, Catagory>();
 		if (newInput != null) {
@@ -150,6 +169,8 @@ class PatientCaseCatagoryComboViewer extends ACommonComboViewer {
 				this.input.put(cat.getName(), cat);
 			}
 		}
+		
+		notifyDependViewers(dependViewers, multiSelectionCatList, isContainOtherText());
 	}
 
 	@Override
@@ -192,13 +213,30 @@ class PatientCaseCatagoryComboViewer extends ACommonComboViewer {
 		return multiSelectionCatList.containsKey(((Catagory) element).getName());
 	}
 
+	private String currOtherTextValue;
 	@Override
 	public void modifyText(ModifyEvent e) {
-		String text = tableComboViewer.getTableCombo().getText();
-		if (StringUtils.isBlank(text)) {
-			tableComboViewer.refresh();
-			multiSelectionCatList.clear();
+		if (otherText != null && e.getSource() == otherText) {
+			final String newOtherText = otherText.getText();
+			boolean isOldTextPlan = StringUtils.isBlank(currOtherTextValue); 
+			boolean isNewTextPlan = StringUtils.isBlank(newOtherText);
+			
+			if (isOldTextPlan == isNewTextPlan) {
+				return;
+			}
+			notifyDependViewers(dependViewers, multiSelectionCatList, isContainOtherText());
+			this.currOtherTextValue = otherText.getText();
+		} else {
+			String text = tableComboViewer.getTableCombo().getText();
+			if (StringUtils.isBlank(text)) {
+				tableComboViewer.refresh();
+				multiSelectionCatList.clear();
+				notifyDependViewers(dependViewers, multiSelectionCatList, isContainOtherText());
+			}
 		}
 	}
 
+	private boolean isContainOtherText() {
+		return otherText != null && !otherText.getText().isEmpty();
+	}
 }

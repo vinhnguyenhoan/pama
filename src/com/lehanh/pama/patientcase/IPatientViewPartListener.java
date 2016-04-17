@@ -2,6 +2,6 @@ package com.lehanh.pama.patientcase;
 
 public interface IPatientViewPartListener {
 
-	void patientChanged(Patient oldPa, Patient newPa);
+	void patientChanged(Patient oldPa, Patient newPa, String[] callIds);
 
 }

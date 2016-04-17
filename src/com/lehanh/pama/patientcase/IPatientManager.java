@@ -15,18 +15,22 @@ public interface IPatientManager extends IService {
 
 	Patient getCurrentPatient();
 	
+	void addPaListener(IPatientViewPartListener paL, String id);
+	
 	IPatientSearcher getPatientSearcher();
 	
 	IAppointmentManager getAppointmentManager();
 
-	void updatePatient(String imagePath, String name, String address,
+	void selectPatient(String uiId, Patient newPatient);
+	
+	void updatePatient(String uiId, String imagePath, String name, String address,
 			Date birthDay, boolean isFermale, String cellPhone, String phone,
 			String email, String career, int patientLevel, String note, String detailExam,
 			String medicalHistory, String anamnesis);
 
-	void addPaListener(IPatientViewPartListener paL);
+	void updatePatient(String uid);
 
-	void updatePatientCase(PatientCaseEntity paCaseEntity,
+	void updatePatientCase(String uiId, Integer rootCaseId, PatientCaseEntity paCaseEntity,
 			DrCatagory drCat,
 			List<ServiceCatagory> serviceList,
 			List<PrognosticCatagory> progCatList, String prognosticOtherText,
@@ -36,8 +40,8 @@ public interface IPatientManager extends IService {
 			Date surgeryDate, boolean complication, boolean beauty,
 			String smallSurgery, String drAdvice, Date nextApp,
 			AppointmentCatagory appPurpose, String appNot);
-
-	void createEmptyCase(PatientCaseStatus status);
-
+	
 	void cancelEditingPatientCase();
+
+
 }

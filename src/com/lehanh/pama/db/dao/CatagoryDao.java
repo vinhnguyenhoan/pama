@@ -20,6 +20,7 @@ public class CatagoryDao implements IDao {
 	private static final String CAT_TABLE = "catagory";
 	private static final String ID_COL = "id";
 	private static final String NAME_COL = "name";
+	private static final String SYMBOL_COL = "symbol";
 	private static final String TYPE_COL = "cat_type";
 	private static final String DESC_COL = "cat_desc";
 	private static final String REFIDS_COL = "ref_ids";
@@ -58,6 +59,7 @@ public class CatagoryDao implements IDao {
 		Catagory cat = CatagoryType.valueOf(rs.getString(TYPE_COL)).createCatalog(rs.getLong(ID_COL));
 		cat.setName(rs.getString(NAME_COL));
 		cat.setDesc(rs.getString(DESC_COL));
+		cat.setSymbol(rs.getString(SYMBOL_COL));
 		cat.setRefIdsText(rs.getString(REFIDS_COL));
 		cat.setOtherDataText(rs.getString(OTHERDATA_COL));
 		return cat;
@@ -70,10 +72,11 @@ public class CatagoryDao implements IDao {
 			conn = DatabaseManager.getInstance().getConn();
 			ps = conn.prepareStatement(
 					"insert into " + CAT_TABLE + 
-						" (name, cat_type, cat_desc, ref_ids, other_data) " + 
-						" values (?, ?, ?, ?, ? ) ", Statement.RETURN_GENERATED_KEYS);
+						" (name, symbol, cat_type, cat_desc, ref_ids, other_data) " + 
+						" values (?, ?, ?, ?, ?, ? ) ", Statement.RETURN_GENERATED_KEYS);
 			int i = 1;
 			ps.setString(i++, item.getName());
+			ps.setString(i++, item.getSymbol());
 			ps.setString(i++, item.getType().toString());
 			ps.setString(i++, item.getDesc());
 			ps.setString(i++, item.getRefIdsText());
@@ -108,11 +111,12 @@ public class CatagoryDao implements IDao {
 			conn = DatabaseManager.getInstance().getConn();
 			ps = conn.prepareStatement(
 					"update " + CAT_TABLE + 
-					" set name=?, cat_type=?, cat_desc=?, ref_ids=?, other_data=? " +
+					" set name=?, symbol=?, cat_type=?, cat_desc=?, ref_ids=?, other_data=? " +
 					" where item_id=? ");
 
 			int i = 1;
 			ps.setString(i++, item.getName());
+			ps.setString(i++, item.getSymbol());
 			ps.setString(i++, item.getType().toString());
 			ps.setString(i++, item.getDesc());
 			ps.setString(i++, item.getRefIdsText());
@@ -156,9 +160,9 @@ public class CatagoryDao implements IDao {
 			DatabaseManager.initialize();
 			catDao.internalDeleteAll();
 			
-			long sg1 = catDao.insert(new Catagory(CatagoryType.SURGERY, "Nang mui silat", "Nang mui silat", null));
-			long sg2 = catDao.insert(new Catagory(CatagoryType.SURGERY, "Nang mui cau truc", "Nang mui cau truc", null));
-			long sg3 = catDao.insert(new Catagory(CatagoryType.SURGERY, "Chỉnh mũi gồ", "Chỉnh mũi gồ", null));
+			long sg1 = catDao.insert(new Catagory(CatagoryType.SURGERY, "Nang mui silat", "Nose surgery silat", "Nang mui silat", null));
+			long sg2 = catDao.insert(new Catagory(CatagoryType.SURGERY, "Nang mui cau truc", "Nose surgery modern", "Nang mui cau truc", null));
+			long sg3 = catDao.insert(new Catagory(CatagoryType.SURGERY, "Chỉnh mũi gồ", "Nose surgery go", "Chỉnh mũi gồ", null));
 			
 			long d1 = catDao.insert(new Catagory(CatagoryType.DIAGNOSE, "Mũi thap tai nan", "Mũi thap tai nan", sg1 + "|" + sg2));
 			long d2 = catDao.insert(new Catagory(CatagoryType.DIAGNOSE, "Mũi thap bam sinh", "Mũi thap bam sinh", sg1 + "|" + sg2));
@@ -172,13 +176,13 @@ public class CatagoryDao implements IDao {
 			long s1 = catDao.insert(new Catagory(CatagoryType.SERVICE, "Nâng mũi", "Nâng mũi", p1 + "|" + p2 + "|" + p3 + "|" + p4));
 			catDao.insert(new Catagory(CatagoryType.SERVICE, "Nâng ngực", "Nâng ngực", null));
 
+			catDao.insert(new Catagory(CatagoryType.DR, "LE Hanh", "LE Hanh", null));
+			
 			List<Catagory> result = catDao.loadAllCatagory();
 			System.out.println("result " + result.size());
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

@@ -1,10 +1,14 @@
 package com.lehanh.pama.patientcase;
 
 import java.io.Serializable;
+import java.security.InvalidParameterException;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -22,7 +26,11 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 
 	@Expose
 	private int id = -1;
-	
+	@Expose
+	@SerializedName("date")
+	private String dateAsText;
+	private Date date;
+
 	@Expose
 	@SerializedName("ss")
 	private String status;
@@ -89,24 +97,14 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 	private boolean beautiful;
 	
 	@Expose
-	private Map<String, Map<String, Object>> picInfos;
+	@SerializedName("appoS")
+	private AppointmentSchedule appoSchedule;
+
+	@Expose
+	private Map<String, Map<String, Map<String, Object>>> picInfos;
 	
 	@Expose
 	private List<PatientCaseEntity> reExamInfo;
-
-	@Expose
-	@SerializedName("date")
-	private String dateAsText;
-	private Date date;
-
-//	@Expose
-//	@SerializedName("nDate")
-//	private String nextDateAsText;
-//	private Date nextDate;
-	
-	@Expose
-	@SerializedName("appoS")
-	private AppointmentSchedule appoSchedule;
 
 	public PatientCaseEntity() {
 	}
@@ -114,6 +112,10 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 	PatientCaseEntity(String dateText, PatientCaseStatus status) {
 		this.setDateAsText(dateText);
 		this.setStatusEnum(status);
+	}
+
+	PatientCaseEntity(String dateText) {
+		this(dateText, null);
 	}
 
 	public int getId() {
@@ -132,20 +134,24 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		return status;
 	}
 
-	void setStatus(String status) {
+	public void setStatus(String status) {
 		this.status = status;
 	}
 
 	public PatientCaseStatus getStatusEnum() {
+		if (this.status == null) {
+			return null;
+		}
+		
 		if (statusEnum == null) {
 			statusEnum = PatientCaseStatus.valueOf(this.status);
 		}
 		return statusEnum;
 	}
 
-	void setStatusEnum(PatientCaseStatus statusEnum) {
+	public void setStatusEnum(PatientCaseStatus statusEnum) {
 		this.statusEnum = statusEnum;
-		this.status = statusEnum.name();
+		this.status = statusEnum == null ? null : statusEnum.name();
 	}
 
 	public Long getDrId() {
@@ -153,6 +159,9 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 	}
 
 	void setDrId(Long drId) {
+		if (drId == null || drId < 0) {
+			throw new InvalidParameterException("Phải chọn bác sỹ !");
+		}
 		this.drId = drId;
 	}
 
@@ -168,7 +177,7 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		return serviceNames;
 	}
 
-	void setServiceNames(List<String> serviceIds) {
+	public void setServiceNames(List<String> serviceIds) {
 		ValidateUtils.validateIsAllEmpty("Phải chọn dịch vụ", serviceIds);
 		this.serviceNames = serviceIds;
 	}
@@ -185,7 +194,7 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		return prognosticCatagoryNames;
 	}
 
-	void setPrognosticCatagoryNames(List<String> prognosticCatagoryIds) {
+	public void setPrognosticCatagoryNames(List<String> prognosticCatagoryIds) {
 		this.prognosticCatagoryNames = prognosticCatagoryIds;
 	}
 
@@ -202,7 +211,7 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		return diagnoseCatagoryNames;
 	}
 
-	void setDiagnoseCatagoryNames(List<String> diagnoseCatagoryIds) {
+	public void setDiagnoseCatagoryNames(List<String> diagnoseCatagoryIds) {
 		this.diagnoseCatagoryNames = diagnoseCatagoryIds;
 	}
 
@@ -218,7 +227,7 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		return surgeryCatagoryNames;
 	}
 
-	void setSurgeryCatagoryNames(List<String> surgeryCatagoryIds) {
+	public void setSurgeryCatagoryNames(List<String> surgeryCatagoryIds) {
 		this.surgeryCatagoryNames = surgeryCatagoryIds;
 	}
 
@@ -234,7 +243,7 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		return surgeryNote;
 	}
 
-	void setSurgeryNote(String surgeryNote) {
+	public void setSurgeryNote(String surgeryNote) {
 		this.surgeryNote = surgeryNote;
 	}
 
@@ -242,7 +251,7 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		return noteFromClient;
 	}
 
-	void setNoteFromClient(String noteFromClient) {
+	public void setNoteFromClient(String noteFromClient) {
 		this.noteFromClient = noteFromClient;
 	}
 
@@ -250,7 +259,7 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		return noteFromDr;
 	}
 
-	void setNoteFromDr(String noteFromDr) {
+	public void setNoteFromDr(String noteFromDr) {
 		this.noteFromDr = noteFromDr;
 	}
 
@@ -258,7 +267,7 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		return smallSurgery;
 	}
 
-	void setSmallSurgery(String smallSurgery) {
+	public void setSmallSurgery(String smallSurgery) {
 		this.smallSurgery = smallSurgery;
 	}
 
@@ -266,23 +275,26 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		return adviceFromDr;
 	}
 
-	void setAdviceFromDr(String adviceFromDr) {
+	public void setAdviceFromDr(String adviceFromDr) {
 		this.adviceFromDr = adviceFromDr;
 	}
 
-	Map<String, Map<String, Object>> getPicInfos() {
+	public Map<String, Map<String, Map<String, Object>>> getPicInfos() {
 		return picInfos;
 	}
 
-	void setPicInfos(Map<String, Map<String, Object>> picInfos) {
+	public void setPicInfos(Map<String, Map<String, Map<String, Object>>> picInfos) {
 		this.picInfos = picInfos;
 	}
 
 	public List<PatientCaseEntity> getReExamInfo() {
+		if (reExamInfo == null) {
+			reExamInfo = new LinkedList<PatientCaseEntity>();
+		}
 		return reExamInfo;
 	}
 
-	void setReExamInfo(List<PatientCaseEntity> reExamInfo) {
+	public void setReExamInfo(List<PatientCaseEntity> reExamInfo) {
 		this.reExamInfo = reExamInfo;
 	}
 
@@ -290,7 +302,7 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		return surgeryDateAsText;
 	}
 
-	void setSurgeryDateAsText(String surgeryDateAsText) {
+	public void setSurgeryDateAsText(String surgeryDateAsText) {
 		this.surgeryDateAsText = surgeryDateAsText;
 	}
 
@@ -298,7 +310,7 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		return surgeryDate;
 	}
 
-	void setSurgeryDate(Date surgeryDate) {
+	public void setSurgeryDate(Date surgeryDate) {
 		this.surgeryDate = surgeryDate;
 	}
 
@@ -306,7 +318,7 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		return appoSchedule;
 	}
 
-	void setAppoSchedule(AppointmentSchedule appoSchedule) {
+	public void setAppoSchedule(AppointmentSchedule appoSchedule) {
 		this.appoSchedule = appoSchedule;
 	}
 
@@ -314,7 +326,7 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		return complication;
 	}
 
-	void setComplication(boolean complication) {
+	public void setComplication(boolean complication) {
 		this.complication = complication;
 	}
 
@@ -322,11 +334,11 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		return beautiful;
 	}
 
-	void setBeautiful(boolean beautiful) {
+	public void setBeautiful(boolean beautiful) {
 		this.beautiful = beautiful;
 	}
 
-	void setDateAsText(String date) {
+	public void setDateAsText(String date) {
 		this.dateAsText = date;
 		this.date = null;
 	}
@@ -342,7 +354,7 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		return date;
 	}
 
-	void setDate(Date date) {
+	public void setDate(Date date) {
 		this.date = date;
 		this.dateAsText = DateUtils.convertDateDataType(date);
 	}
@@ -355,11 +367,11 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		return this.diagnoseOther;
 	}
 
-	void setPrognosticOther(String prognosticOther) {
+	public void setPrognosticOther(String prognosticOther) {
 		this.prognosticOther = prognosticOther;
 	}
 
-	void setDiagnoseOther(String diagnoseOther) {
+	public void setDiagnoseOther(String diagnoseOther) {
 		this.diagnoseOther = diagnoseOther;
 	}
 
@@ -372,6 +384,14 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 			Date surgeryDate, boolean complication, boolean beauty,
 			String smallSurgery, String drAdvice, 
 			Date nextApp, AppointmentCatagory appPurpose, String appNote) {
+		
+		if ((progCatList == null || progCatList.isEmpty()) && StringUtils.isBlank(prognosticOtherText)) {
+			throw new InvalidParameterException("Phải chọn triệu chứng !");
+		}
+		if ((diagCatList == null || diagCatList.isEmpty()) && StringUtils.isBlank(diagOtherText)) {
+			throw new InvalidParameterException("Phải chọn chẩn đoán !");
+		}
+		
 		this.setDrId(drCat);
 		this.setServiceNames(serviceList);
 		this.setPrognosticCatagoryNames(progCatList);
@@ -380,6 +400,7 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		this.setDiagnoseOther(diagOtherText);
 		this.setNoteFromClient(noteFromPa);
 		this.setNoteFromDr(noteFromDr);
+		
 		this.setSurgeryCatagoryNames(surList);
 		this.setSurgeryNote(surgeryNote);
 		this.setSurgeryDate(surgeryDate);
@@ -399,5 +420,4 @@ public class PatientCaseEntity implements Serializable, IJsonDataObject {
 		}
 	}
 
-	
 }

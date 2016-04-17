@@ -1,15 +1,14 @@
 package com.lehanh.pama.ui;
 
 import org.eclipse.jface.action.ControlContribution;
-import org.eclipse.jface.action.StatusLineLayoutData;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 
 class TextStatusContribution extends ControlContribution {
@@ -51,13 +50,13 @@ class TextStatusContribution extends ControlContribution {
 			comp.setLayout(new GridLayout(1, true));
 //			StatusLineLayoutData ld = new StatusLineLayoutData();
 //			comp.setLayoutData()
-			text = new Label(comp, SWT.CENTER);
+			text = new CLabel(comp, SWT.CENTER);
 		}
 		if (initialText != null) {
 			if (button) {
 				((Button) text).setText(initialText);
 			} else {
-				((Label) text).setText(initialText);
+				((CLabel) text).setText(initialText);
 			}
 		}
 		if (listener != null) {
@@ -73,9 +72,11 @@ class TextStatusContribution extends ControlContribution {
 		if (button) {
 			((Button) text).setText(s);
 		} else {
-			((Label) text).setText(s);
+			((CLabel) text).setText(s);
 		}
+		text.getParent().layout();
 		text.getParent().getParent().layout();
+		text.getParent().getParent().redraw();
 	}
 	
 	void setTextAsync(final String s) {

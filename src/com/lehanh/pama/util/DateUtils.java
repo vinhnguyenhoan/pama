@@ -54,6 +54,13 @@ public class DateUtils {
 		return spDF.format(date);
 	}
 	
+	public static String convertDateDataType(Calendar date) {
+		if (date == null) {
+			return null;
+		}
+		return spDF.format(date.getTime());
+	}
+	
 	public static void main(String[] args) throws ParseException {
 		Calendar g = GregorianCalendar.getInstance();
 		g.set(1985, 9, 18);

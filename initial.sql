@@ -25,6 +25,7 @@ CREATE TABLE `pama`.`patient` (
 CREATE TABLE `pama`.`catagory` (
     `id` SMALLINT NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(70) NOT NULL,
+    `symbol` VARCHAR(70),
     `cat_desc` VARCHAR(200),    
     `cat_type` VARCHAR(150),
     `ref_ids` TEXT,

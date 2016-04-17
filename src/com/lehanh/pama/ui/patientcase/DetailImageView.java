@@ -1,25 +1,19 @@
 package com.lehanh.pama.ui.patientcase;
 
-import java.util.Map;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.wb.swt.SWTResourceManager;
 
 import com.lehanh.pama.patientcase.IPatientManager;
 import com.lehanh.pama.patientcase.IPatientViewPartListener;
+import com.lehanh.pama.patientcase.ISurgeryImageList;
 import com.lehanh.pama.patientcase.Patient;
-import com.lehanh.pama.patientcase.PatientCaseEntity;
 import com.lehanh.pama.ui.PamaFormUI;
 import com.lehanh.pama.ui.patientcase.patientimage.ImageCanvasPainter;
-import com.lehanh.pama.ui.util.ObjectToUIText;
+import com.lehanh.pama.ui.util.PamaResourceManager;
 import com.lehanh.pama.util.PamaHome;
 
 public class DetailImageView extends PamaFormUI implements IPatientViewPartListener, IPatientView {
@@ -30,17 +24,13 @@ public class DetailImageView extends PamaFormUI implements IPatientViewPartListe
 
 	private ImageCanvasPainter canvasPainter;
 
-	private Button linkButton;
-
-	private Button deleteButton;
-
-	private Button addImageButton;
-
 	private IPatientManager paManager;
+
+	// private CCombo filterCombo;
 
 	public DetailImageView() {
 		paManager = (IPatientManager) PamaHome.getService(IPatientManager.class);
-		paManager.addPaListener(this);
+		paManager.addPaListener(this, ID);
 	}
 
 	@Override
@@ -48,7 +38,8 @@ public class DetailImageView extends PamaFormUI implements IPatientViewPartListe
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout(1, false));
 		
-		SashForm sashForm = new SashForm(composite, SWT.NONE);
+		SashForm sashForm = new SashForm(composite, SWT.BORDER | SWT.SMOOTH);
+		sashForm.setBackground(PamaResourceManager.getColor(SWT.COLOR_GRAY));
 		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		
 		Composite galleryCom = new Composite(sashForm, SWT.NONE);
@@ -59,81 +50,47 @@ public class DetailImageView extends PamaFormUI implements IPatientViewPartListe
 		gl_galleryCom.horizontalSpacing = 0;
 		galleryCom.setLayout(gl_galleryCom);
 		galleryCom.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-		
-		this.gallery = new SurgeryGallary(galleryCom, SWT.V_SCROLL | SWT.MULTI, new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 
-		Composite gaButtonsCom = new Composite(galleryCom, SWT.NONE);
-		GridLayout gl_gaButtonsCom = new GridLayout(3, false);
-		gl_gaButtonsCom.marginWidth = 0;
-		gl_gaButtonsCom.marginHeight = 0;
-		gl_gaButtonsCom.horizontalSpacing = 0;
-		gaButtonsCom.setLayout(gl_gaButtonsCom);
-		gaButtonsCom.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
+		// Composite filterCom = new Composite(galleryCom, SWT.NONE);
+		// GridLayout gl = new GridLayout(1, false);
+		// gl.marginBottom = 5;
+		// gl.marginWidth = 0;
+		// gl.marginHeight = 0;
+		// gl.horizontalSpacing = 0;
+		// filterCom.setLayout(gl);
+		// filterCom.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,
+		// 1, 1));
+		//
+		// this.filterCombo = new CCombo(filterCom, SWT.BORDER | SWT.DROP_DOWN |
+		// SWT.READ_ONLY);
+		// filterCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true,
+		// false, 1, 1));
 		
-		this.linkButton = new Button(gaButtonsCom, SWT.NONE);
-		linkButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
-		linkButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				link();
-			}
-		});
-		linkButton.setImage(SWTResourceManager.getImage("C:\\Users\\vinhhnguyen\\Desktop\\insert_link.png"));
+		this.gallery = new SurgeryGallary(ID, galleryCom, SWT.V_SCROLL | SWT.MULTI, new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 
-		this.deleteButton = new Button(gaButtonsCom, SWT.NONE);
-		deleteButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				delete();
-			}
-		});
-		deleteButton.setImage(SWTResourceManager.getImage("C:\\Users\\vinhhnguyen\\Desktop\\symbol_delete.png"));
-		
-		this.addImageButton = new Button(gaButtonsCom, SWT.NONE);
-		addImageButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		addImageButton.setImage(SWTResourceManager.getImage("C:\\Users\\vinhhnguyen\\Desktop\\plus_orange.png"));
-		addImageButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				add();
-			}
-		});
-
-		
 		Composite composite_1 = new Composite(sashForm, SWT.NONE);
-		composite_1.setLayout(new GridLayout(1, false));
+		GridLayout gl_composite_1 = new GridLayout(1, false);
+		gl_composite_1.verticalSpacing = 0;
+		gl_composite_1.marginWidth = 0;
+		gl_composite_1.marginHeight = 0;
+		gl_composite_1.horizontalSpacing = 0;
+		composite_1.setLayout(gl_composite_1);
 		
-		Canvas canvas = new Canvas(composite_1, SWT.NONE);
+		this.canvasPainter = new ImageCanvasPainter(composite_1);
+		Canvas canvas = this.canvasPainter.getCanvas();
 		canvas.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-		this.canvasPainter = new ImageCanvasPainter(canvas);
 		
 		sashForm.setWeights(new int[] {1, 3});
-		// TODO Auto-generated method stub
 	}
 	
 	@Override
 	public void organizeUIComponent() {
 		// initial actions
-		
-		
-		// TODO Auto-generated method stub
+		this.gallery.setCanvasPainter(this.canvasPainter);
+		// initial Combo values
+		this.patientChanged(null, paManager.getCurrentPatient(), null);
 	}
 	
-	private void add() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	private void delete() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	private void link() {
-		// TODO Auto-generated method stub
-		
-	}
-
 	@Override
 	public void setFocus() {
 		// TODO Auto-generated method stub
@@ -142,7 +99,7 @@ public class DetailImageView extends PamaFormUI implements IPatientViewPartListe
 
 	@Override
 	public boolean isEditing() {
-		// TODO Auto-generated method stub
+		// do nothing, just add and remove so not have editing status
 		return false;
 	}
 
@@ -152,23 +109,17 @@ public class DetailImageView extends PamaFormUI implements IPatientViewPartListe
 	 * View all surgery images from new selected patient
 	 */
 	@Override
-	public void patientChanged(Patient oldPa, Patient newPa) {
-		Map<String, Map<String, Map<String, Object>>> allImages = newPa.getMedicalPersonalInfo().getPatientCaseList().getAllImageGroup(this.showGroupFromPA);
-		gallery.updateGallery(allImages);
+	public void patientChanged(Patient oldPa, Patient newPa, String[] callIds) {
+		if (newPa != null) {
+			ISurgeryImageList allImages = newPa.getMedicalPersonalInfo().getPatientCaseList()
+																		   .getSurgeryImageList()
+																		   //.getAllImageGroup(this.showGroupFromPA)
+																		   ;
+			gallery.updateGallery(allImages, callIds);
+		} else {
+			gallery.updateGallery(null, callIds);
+		}
 		canvasPainter.clearImages();
 	}
-	private ObjectToUIText<PatientCaseEntity, Integer> showGroupFromPA = new ObjectToUIText<PatientCaseEntity, Integer>() {
-		
-		@Override
-		public String showUI(PatientCaseEntity object) {
-			return "Lần khám thứ " + String.valueOf(object.getId()) + " - " + object.getDateAsText();
-		}
-		
-		@Override
-		public Integer getIdForUI(PatientCaseEntity object) {
-			return object.getId();
-		}
-	};
-	
 	
 }

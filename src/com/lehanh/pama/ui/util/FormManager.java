@@ -128,25 +128,31 @@ public class FormManager implements IFormManager {
 	}
 
 	@Override
-	public IFormManager setEditable(boolean editable, Control control) {
-		Boolean isReadOnly = (Boolean) control.getData(READ_ONLY);
-		if (control instanceof Text && !Boolean.TRUE.equals(isReadOnly)) {
-			// Ignore if read only style control
-			((Text) control).setEditable(editable);
-		} else if (control instanceof CCombo) {
-			CCombo ccombo = (CCombo) control;
-			ccombo.setListVisible(editable);
-			ccombo.setEnabled(editable);
-		} else if (control instanceof Combo) {
-			Combo combo = (Combo) control;
-			combo.setListVisible(editable);
-			combo.setEnabled(editable);
-		} else if (control instanceof TableCombo) {
-			TableCombo tC = (TableCombo) control;
-			tC.setEnabled(editable);
-			//tC.setTableVisible(editable);
-		} else {
-			control.setEnabled(editable);
+	public IFormManager setEditable(boolean editable, Control... controls) {
+		if (controls == null || controls.length == 0) {
+			return this;
+		}
+		
+		for (Control control : controls) {
+			Boolean isReadOnly = (Boolean) control.getData(READ_ONLY);
+			if (control instanceof Text && !Boolean.TRUE.equals(isReadOnly)) {
+				// Ignore if read only style control
+				((Text) control).setEditable(editable);
+			} else if (control instanceof CCombo) {
+				CCombo ccombo = (CCombo) control;
+				ccombo.setListVisible(editable);
+				ccombo.setEnabled(editable);
+			} else if (control instanceof Combo) {
+				Combo combo = (Combo) control;
+				combo.setListVisible(editable);
+				combo.setEnabled(editable);
+			} else if (control instanceof TableCombo) {
+				TableCombo tC = (TableCombo) control;
+				tC.setEnabled(editable);
+				//tC.setTableVisible(editable);
+			} else {
+				control.setEnabled(editable);
+			}
 		}
 		return this;
 	}

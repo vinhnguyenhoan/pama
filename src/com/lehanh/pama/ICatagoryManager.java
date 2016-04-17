@@ -7,7 +7,6 @@ import java.util.Map;
 import com.lehanh.pama.catagory.Catagory;
 import com.lehanh.pama.catagory.CatagoryType;
 
-
 public interface ICatagoryManager extends IService {
 	
 	Map<Long, Catagory> getCatagoryByType(CatagoryType catType);
@@ -15,4 +14,8 @@ public interface ICatagoryManager extends IService {
 	List<Catagory> getSubCatagorysByParent(Long parentId, CatagoryType type);
 	
 	void saveCatagory(Catagory cat) throws SQLException;
+
+	Catagory getCatagoryByTypeAndName(CatagoryType catType, String name);
+
+	List<Catagory> getCatagoryByTypeAndName(CatagoryType type, List<String> allNames);
 }

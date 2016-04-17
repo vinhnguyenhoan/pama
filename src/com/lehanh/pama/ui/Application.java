@@ -6,12 +6,19 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.commands.operations.OperationStatus;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
+import org.eclipse.jface.action.ContributionItem;
+import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.action.StatusLineContributionItem;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 
@@ -28,6 +35,11 @@ public class Application implements IApplication, PamaApplication, IPatientViewP
 
 	private Properties appProperties;
 	public static TextStatusContribution patientTextContribution;
+	public static IStatusLineManager statusLine;
+	public static ContributionItem statusLineItem;
+	public static Label statusLineLabel;
+	public static Text statusLineText;
+	public static StatusLineContributionItem statusItem;
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.equinox.app.IApplication#start(org.eclipse.equinox.app.IApplicationContext)
@@ -35,7 +47,7 @@ public class Application implements IApplication, PamaApplication, IPatientViewP
 	public Object start(IApplicationContext context) throws Exception {
 		PamaHome.application = this;
 		PamaHome.initialize();
-		((IPatientManager) PamaHome.getService(IPatientManager.class)).addPaListener(this);
+		((IPatientManager) PamaHome.getService(IPatientManager.class)).addPaListener(this, Application.class.toString());
 		Display display = PlatformUI.createDisplay();
 		try {
 			int returnCode = PlatformUI.createAndRunWorkbench(display, new ApplicationWorkbenchAdvisor());
@@ -67,19 +79,19 @@ public class Application implements IApplication, PamaApplication, IPatientViewP
 
 	@Override
 	public String getUserId() {
-		// TODO Auto-generated method stub
+		// TODO getUserId
 		return null;
 	}
 
 	@Override
 	public String getPassword() {
-		// TODO Auto-generated method stub
+		// TODO getPassword
 		return null;
 	}
 
 	@Override
 	public void setPassword(String pw) {
-		// TODO Auto-generated method stub
+		// TODO setPassword
 		
 	}
 
@@ -153,7 +165,19 @@ public class Application implements IApplication, PamaApplication, IPatientViewP
 	}
 
 	@Override
-	public void patientChanged(Patient oldPa, Patient newPa) {
-		patientTextContribution.setText(newPa.getName());
+	public void patientChanged(Patient oldPa, Patient newPa, String[] callIds) {
+		if (newPa == null) {
+//			patientTextContribution.setText(StringUtils.EMPTY);
+			statusItem.setText(StringUtils.EMPTY);
+		} else {
+//			patientTextContribution.setText(newPa.getName());
+			statusItem.setText(newPa.getName());
+		}
+		//statusLine.update(true);
+	}
+
+	@Override
+	public Image loadImage(String path) {
+		return Activator.getImageDescriptor(path).createImage(); //$NON-NLS-1$
 	}
 }

@@ -12,6 +12,7 @@ public class Catagory {
 	private Long id;
 	private String name;
 	private String desc;
+	private String symbol;
 	private final CatagoryType type;
 	
 	public static final String SEPARATE = "\\|";
@@ -29,15 +30,17 @@ public class Catagory {
 		this.type = type;
 	}
 	
-	public Catagory(Long id, CatagoryType catagoryType, String name, String desc) {
-		this(id, catagoryType);
-		this.setName(name);
-		this.setDesc(desc);
-	}
-
 	public Catagory(CatagoryType catagoryType, String name, String desc, String refIds) {
 		this(catagoryType);
 		this.setName(name);
+		this.setDesc(desc);
+		this.setRefIdsText(refIds);
+	}
+	
+	public Catagory(CatagoryType catagoryType, String name, String symbol, String desc, String refIds) {
+		this(catagoryType);
+		this.setName(name);
+		this.setSymbol(symbol);
 		this.setDesc(desc);
 		this.setRefIdsText(refIds);
 	}
@@ -68,6 +71,17 @@ public class Catagory {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getSymbol() {
+		if (symbol == null) {
+			return this.getName();
+		}
+		return symbol;
+	}
+
+	public void setSymbol(String symbol) {
+		this.symbol = symbol;
 	}
 
 	public String getRefIdsText() {
